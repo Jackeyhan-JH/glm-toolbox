@@ -1,0 +1,277 @@
+/* 文本对比私有样式（经 ctx.loadStyle 加载，切换工具时自动移除）。
+   通用样式（按钮 / 表单 / 两栏布局 / 输出框）见 assets/css/base.css。
+   颜色一律引用 assets/css/theme.css 的变量，深浅主题都可用。 */
+
+.text-diff .tool-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 14px;
+  margin-bottom: 14px;
+}
+
+.text-diff .tool-title {
+  font-size: 20px;
+}
+
+.text-diff .tool-desc {
+  color: var(--fg-muted);
+  flex: 1 1 240px;
+}
+
+.text-diff .tool-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* ---------- 控制区 ---------- */
+
+.diff-controls {
+  margin-bottom: 12px;
+}
+
+.diff-opt {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  color: var(--fg-2);
+}
+
+.diff-opt input {
+  accent-color: var(--accent);
+  margin: 0;
+}
+
+.diff-opt:has(input:disabled) {
+  color: var(--fg-muted);
+  cursor: not-allowed;
+}
+
+.diff-opt-sep {
+  color: var(--fg-muted);
+}
+
+/* ---------- 输入区 ---------- */
+
+.diff-inputs {
+  margin-bottom: 12px;
+}
+
+.diff-input textarea {
+  min-height: 200px;
+}
+
+/* ---------- 统计 ---------- */
+
+.diff-statsbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0 0 10px;
+}
+
+.diff-statsbar strong {
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+
+.diff-same {
+  color: var(--ok);
+  font-weight: 500;
+}
+
+/* ---------- 行视图（并排 / 合并） ---------- */
+
+.diff-lines {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-m);
+  background: var(--bg-raise);
+  overflow: auto;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.diff-row {
+  display: grid;
+  grid-template-columns: 3.2em minmax(0, 1fr) 3.2em minmax(0, 1fr);
+  align-items: stretch;
+}
+
+.diff-urow {
+  display: grid;
+  grid-template-columns: 3.2em 3.2em 1em minmax(0, 1fr);
+  align-items: stretch;
+}
+
+.diff-ln {
+  color: var(--fg-muted);
+  text-align: right;
+  padding: 0 8px;
+  user-select: none;
+  background: var(--bg-inset);
+  line-height: 1.55;
+  white-space: nowrap;
+}
+
+.diff-cell,
+.diff-cell-text {
+  padding: 0 8px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.diff-cell.is-empty {
+  background: var(--bg-inset);
+}
+
+.diff-row.row-eq .diff-cell.is-eq {
+  background: var(--bg-raise);
+}
+
+/* 删除红 / 新增绿 */
+.diff-cell.is-del,
+.diff-urow.urow-del {
+  background: var(--danger-bg);
+}
+
+.diff-cell.is-add,
+.diff-urow.urow-add {
+  background: var(--ok-bg);
+}
+
+.diff-urow.urow-eq {
+  background: var(--bg-raise);
+}
+
+.diff-prefix {
+  text-align: center;
+  line-height: 1.55;
+  user-select: none;
+}
+
+.diff-urow.urow-del .diff-prefix {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.diff-urow.urow-add .diff-prefix {
+  color: var(--ok);
+  font-weight: 600;
+}
+
+/* 修改行内的字符级高亮（比整行底色更醒目） */
+.diff-mark {
+  border-radius: 3px;
+  padding: 0 1px;
+  font-weight: 600;
+}
+
+.diff-mark.mark-del {
+  background: var(--danger);
+  color: var(--bg-raise);
+}
+
+.diff-mark.mark-add {
+  background: var(--ok);
+  color: var(--bg-raise);
+}
+
+/* 省略占位 */
+.diff-collapsed {
+  padding: 3px 12px;
+  color: var(--fg-muted);
+  background: var(--bg-inset);
+  font-size: 12px;
+  text-align: center;
+  font-family: system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+/* ---------- 词 / 字符视图（流式） ---------- */
+
+.diff-flow {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-m);
+  background: var(--bg-raise);
+  padding: 10px 12px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  margin-bottom: 4px;
+}
+
+.diff-flow-cols {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0 18px;
+}
+
+.diff-tok {
+  border-radius: 3px;
+  padding: 0 2px;
+}
+
+.diff-tok.tok-del {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+.diff-tok.tok-add {
+  background: var(--ok-bg);
+  color: var(--ok);
+}
+
+.diff-collapsed-inline {
+  display: inline;
+  color: var(--fg-muted);
+  font-size: 12px;
+  font-family: system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+/* ---------- unified diff 面板 ---------- */
+
+.diff-unified-panel {
+  margin-top: 16px;
+}
+
+.diff-panel-title {
+  font-size: 15px;
+  margin: 0 0 4px;
+}
+
+.diff-unified {
+  max-height: 460px;
+  margin: 6px 0 0;
+}
+
+/* ---------- 窄屏 ---------- */
+
+@media (max-width: 720px) {
+  .diff-row,
+  .diff-urow {
+    font-size: 12px;
+  }
+
+  .diff-row {
+    grid-template-columns: 2.4em minmax(0, 1fr) 2.4em minmax(0, 1fr);
+  }
+
+  .diff-urow {
+    grid-template-columns: 2.4em 2.4em 1em minmax(0, 1fr);
+  }
+
+  .diff-ln,
+  .diff-cell,
+  .diff-cell-text {
+    padding: 0 5px;
+  }
+
+  .diff-flow-cols {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
