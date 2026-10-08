@@ -52,7 +52,8 @@ export async function mount(root, ctx) {
     const v = ctx.storage.get(key, fallback);
     return typeof v === 'string' ? v : fallback;
   };
-  let level = EC_LEVELS.some((it) => it.value === readString('level', '')) ? readString('level', DEFAULT_LEVEL) : DEFAULT_LEVEL;
+  const savedLevel = readString('level', '');
+  let level = EC_LEVELS.some((it) => it.value === savedLevel) ? savedLevel : DEFAULT_LEVEL;
   let size = clampInt(ctx.storage.get('size', DEFAULT_SIZE), MIN_SIZE, MAX_SIZE, DEFAULT_SIZE);
   let margin = clampInt(ctx.storage.get('margin', DEFAULT_MARGIN), MIN_MARGIN, MAX_MARGIN, DEFAULT_MARGIN);
   let foreground = normalizeHexColor(readString('fg', '#000000')) ?? '#000000';
@@ -366,9 +367,11 @@ export async function mount(root, ctx) {
     downloadBlob(new Blob([svg], { type: 'image/svg+xml;charset=utf-8' }), 'qrcode.svg');
   }
 
+  let copyImageTimer = null;
+
   async function copyImage() {
     if (!lastQr) return;
-    const label = copyImageBtn.textContent;
+    if (copyImageTimer !== null) clearTimeout(copyImageTimer);
     try {
       const blob = await new Promise((resolve, reject) => {
         canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('toBlob 失败'))), 'image/png');
@@ -378,8 +381,9 @@ export async function mount(root, ctx) {
     } catch {
       copyImageBtn.textContent = '复制失败';
     }
-    setTimeout(() => {
-      copyImageBtn.textContent = label;
+    copyImageTimer = setTimeout(() => {
+      copyImageBtn.textContent = '复制图片';
+      copyImageTimer = null;
     }, 1500);
   }
 
@@ -619,6 +623,7 @@ export async function mount(root, ctx) {
   return () => {
     terminateWorker();
     scheduleRefresh.cancel();
+    if (copyImageTimer !== null) clearTimeout(copyImageTimer);
     document.removeEventListener('paste', onPaste);
   };
 }
