@@ -1,0 +1,49 @@
+/* 字数统计私有样式（经 ctx.loadStyle 加载，切换工具时自动移除）。
+   通用样式（按钮 / 统计网格 / 两栏布局等）见 assets/css/base.css，这里只写工具特有的部分。 */
+
+.word-count .tool-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 14px;
+  margin-bottom: 14px;
+}
+
+.word-count .tool-title {
+  font-size: 20px;
+}
+
+.word-count .tool-desc {
+  color: var(--fg-muted);
+  flex: 1 1 240px;
+}
+
+.word-count .tool-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.word-count-editor {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.word-count-editor textarea {
+  flex: 1;
+  min-height: 260px;
+}
+
+.word-count-stats .field-label {
+  display: block;
+  font-weight: 500;
+  color: var(--fg-2);
+  margin-bottom: 6px;
+}
+
+/* 窄屏时统计结果挪到输入框下方（two-col 已处理，这里微调间距） */
+@media (max-width: 900px) {
+  .word-count-stats {
+    margin-top: 4px;
+  }
+}

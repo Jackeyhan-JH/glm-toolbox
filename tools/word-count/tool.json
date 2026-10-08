@@ -1,0 +1,8 @@
+{
+  "id": "word-count",
+  "name": "字数统计",
+  "description": "统计字符数、汉字数、英文单词数、行数与 UTF-8 字节数",
+  "category": "text",
+  "keywords": ["word count", "字数", "zishu", "统计", "字符", "汉字", "行数"],
+  "order": 90
+}
