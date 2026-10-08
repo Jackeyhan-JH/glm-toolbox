@@ -1,0 +1,173 @@
+/* URL 编解码私有样式（经 ctx.loadStyle 加载，切换工具时自动移除）。
+   通用样式（按钮 / 表单 / output-box / two-col 等）见 assets/css/base.css，
+   颜色一律引用 theme.css 中的变量，深浅主题均适用。 */
+
+.url-codec .tool-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 14px;
+  margin-bottom: 14px;
+}
+
+.url-codec .tool-title {
+  font-size: 20px;
+}
+
+.url-codec .tool-desc {
+  color: var(--fg-muted);
+  flex: 1 1 240px;
+}
+
+/* 功能页签 */
+.url-codec .tabs {
+  margin-bottom: 14px;
+}
+
+.url-codec .panel-title {
+  font-size: 15px;
+  margin-bottom: 8px;
+}
+
+/* 编 / 解码两张卡片 */
+.url-codec .codec-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-m);
+  background: var(--bg-raise);
+  padding: 12px 14px;
+}
+
+.url-codec .codec-card textarea {
+  min-height: 130px;
+}
+
+/* 复选框行 */
+.url-codec .check {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--fg-2);
+  cursor: pointer;
+}
+
+.url-codec .check input[type='checkbox'] {
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+/* 结果标题行（标签 + 复制按钮） */
+.url-codec .result-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 12px 0 6px;
+}
+
+.url-codec .result-head .field-label {
+  margin-bottom: 0;
+}
+
+.url-codec .output-box {
+  min-height: 44px;
+}
+
+/* URL 输入框 */
+.url-codec #url-codec-url-input {
+  width: 100%;
+  font-family: var(--font-mono);
+}
+
+.url-codec .mono {
+  font-family: var(--font-mono);
+}
+
+.url-codec .query-note {
+  margin-top: 10px;
+}
+
+/* 部件 / 参数表格 */
+.url-codec .block {
+  margin-top: 18px;
+}
+
+.url-codec .table-wrap {
+  overflow-x: auto; /* 窄屏时表格自身横向滚动，避免整页出现横向滚动条 */
+}
+
+.url-codec .parts-table,
+.url-codec .params-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.url-codec .parts-table th,
+.url-codec .parts-table td,
+.url-codec .params-table th,
+.url-codec .params-table td {
+  border: 1px solid var(--border);
+  padding: 6px 10px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.url-codec .parts-table th,
+.url-codec .params-table th {
+  color: var(--fg-2);
+  font-weight: 500;
+  background: var(--bg-inset);
+  white-space: nowrap;
+}
+
+.url-codec .parts-table td {
+  font-family: var(--font-mono);
+  overflow-wrap: anywhere;
+}
+
+.url-codec .params-table input[type='text'] {
+  width: 100%;
+  min-width: 90px;
+  font-family: var(--font-mono);
+}
+
+.url-codec .params-table .ops {
+  white-space: nowrap;
+}
+
+.url-codec .params-table .ops .btn {
+  margin-right: 2px;
+}
+
+.url-codec .empty-cell {
+  color: var(--fg-muted);
+  text-align: center;
+}
+
+.url-codec .decoded-row {
+  margin: 10px 0 0;
+  justify-content: space-between;
+}
+
+/* 窄屏：参数表整体放下，操作按钮换行，避免被表格滚动区裁掉 */
+@media (max-width: 560px) {
+  .url-codec .params-table input[type='text'] {
+    min-width: 0;
+  }
+
+  .url-codec .params-table .ops {
+    white-space: normal;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .url-codec .params-table .ops .btn {
+    margin-right: 0;
+    padding: 3px 8px;
+  }
+
+  .url-codec .decoded-row {
+    flex-wrap: wrap;
+  }
+}
