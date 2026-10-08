@@ -1,0 +1,168 @@
+/* Base64 工具私有样式（经 ctx.loadStyle 加载，切换工具时自动移除）。
+   通用样式（按钮 / 输出框 / 两栏布局 / seg 等）见 assets/css/base.css，
+   颜色一律使用 assets/css/theme.css 的变量，深浅主题均可用。 */
+
+.base64 .tool-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 14px;
+  margin-bottom: 14px;
+}
+
+.base64 .tool-title {
+  font-size: 20px;
+}
+
+.base64 .tool-desc {
+  color: var(--fg-muted);
+  flex: 1 1 240px;
+}
+
+.base64 .tool-header .seg {
+  margin-left: auto;
+}
+
+/* ---------- 通用小件 ---------- */
+
+.base64-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--fg-2);
+  font-size: 14px;
+}
+
+.base64-count {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--fg-muted);
+  margin-left: 6px;
+}
+
+.base64-panel textarea {
+  width: 100%;
+  min-height: 220px;
+  resize: vertical;
+}
+
+.base64 .tool-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.base64-truncate-note {
+  color: var(--warn);
+}
+
+.base64-hex {
+  font-size: 12px;
+}
+
+/* ---------- 图片模式 ---------- */
+
+.base64-dropzone {
+  display: block;
+  border: 2px dashed var(--border-strong);
+  border-radius: var(--radius-m);
+  background: var(--bg-inset);
+  padding: 22px 14px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.base64-dropzone:hover,
+.base64-dropzone.is-over {
+  border-color: var(--accent);
+  background: var(--accent-weak);
+}
+
+.base64-dropzone-title {
+  color: var(--fg-2);
+  margin-bottom: 4px;
+}
+
+/* 隐藏原生文件输入，交互全部走拖拽 / 点击 / 粘贴 */
+.base64-dropzone input[type='file'] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.base64-preview {
+  margin-top: 12px;
+}
+
+.base64-img-preview {
+  display: block;
+  max-width: 100%;
+  max-height: 240px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-s);
+  background:
+    linear-gradient(45deg, var(--bg-inset) 25%, transparent 25%, transparent 75%, var(--bg-inset) 75%),
+    linear-gradient(45deg, var(--bg-inset) 25%, transparent 25%, transparent 75%, var(--bg-inset) 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 8px 8px;
+}
+
+.base64-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  margin: 8px 0 0;
+}
+
+.base64-meta > div {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.base64-meta dt {
+  color: var(--fg-muted);
+  font-size: 12px;
+}
+
+.base64-meta dd {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--fg);
+}
+
+/* 反向区域（Base64 → 图片 / 文件）与正向用分隔线隔开 */
+.base64-reverse {
+  margin-top: 20px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.base64-reverse textarea {
+  min-height: 96px;
+}
+
+.base64-rev-result {
+  margin-top: 10px;
+}
+
+/* ---------- 文件模式 ---------- */
+
+.base64-panel input[type='file'] {
+  font: inherit;
+  font-size: 13px;
+  color: var(--fg-2);
+}
+
+.base64-reverse input[type='text'] {
+  font: inherit;
+  font-size: 13px;
+  padding: 4px 8px;
+}
