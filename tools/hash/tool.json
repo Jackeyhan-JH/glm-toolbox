@@ -1,0 +1,8 @@
+{
+  "id": "hash",
+  "name": "哈希计算",
+  "description": "计算文本或文件的 MD5、SHA 系列与 HMAC",
+  "category": "crypto",
+  "keywords": ["hash", "md5", "sha1", "sha256", "sha384", "sha512", "hmac", "哈希", "摘要", "散列", "校验", "haxi", "zhaiyao", "jiaoyan"],
+  "order": 10
+}
