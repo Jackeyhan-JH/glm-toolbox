@@ -1,0 +1,8 @@
+{
+  "id": "jwt",
+  "name": "JWT 解析",
+  "description": "解析 JWT 的头部与载荷，检查有效期，可选 HS 验签",
+  "category": "crypto",
+  "keywords": ["jwt", "token", "json web token", "令牌", "解析", "验签", "签名", "jiexi", "yanqian"],
+  "order": 20
+}
