@@ -1,0 +1,175 @@
+/* Cron 解析私有样式（经 ctx.loadStyle 加载，切换工具时自动移除）。
+   通用样式（按钮 / 表单 / output-box 等）见 assets/css/base.css，
+   颜色一律引用 theme.css 中的变量，深浅主题均适用。 */
+
+.cron .tool-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 14px;
+  margin-bottom: 14px;
+}
+
+.cron .tool-title {
+  font-size: 20px;
+}
+
+.cron .tool-desc {
+  color: var(--fg-muted);
+  flex: 1 1 240px;
+}
+
+.cron .panel-title {
+  font-size: 15px;
+  margin-bottom: 8px;
+}
+
+.cron .cron-block {
+  margin-top: 18px;
+}
+
+/* 结果标题行（标签 + 复制按钮） */
+.cron .result-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0 0 6px;
+}
+
+.cron .result-head .panel-title {
+  margin-bottom: 0;
+}
+
+/* 表达式输入卡片 */
+.cron .cron-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-m);
+  background: var(--bg-raise);
+  padding: 12px 14px;
+}
+
+.cron .cron-card input[type='text'] {
+  width: 100%;
+  font-family: var(--font-mono);
+}
+
+/* 常用示例按钮 */
+.cron .cron-examples {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  margin-top: 10px;
+}
+
+.cron .cron-examples .field-label {
+  color: var(--fg-2);
+  margin: 0;
+}
+
+/* 选项行 */
+.cron .cron-controls {
+  align-items: center;
+  gap: 8px 10px;
+  margin-top: 12px;
+}
+
+.cron .cron-controls select {
+  min-width: 110px;
+}
+
+.cron .cron-controls .field-label {
+  margin: 0;
+  white-space: nowrap;
+}
+
+/* 逐段解释表 */
+.cron .table-wrap {
+  overflow-x: auto; /* 窄屏时表格自身横向滚动，避免整页出现横向滚动条 */
+}
+
+.cron .cron-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.cron .cron-table th,
+.cron .cron-table td {
+  border: 1px solid var(--border);
+  padding: 6px 10px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.cron .cron-table th {
+  color: var(--fg-2);
+  font-weight: 500;
+  background: var(--bg-inset);
+  white-space: nowrap;
+}
+
+.cron .cron-table td {
+  font-family: var(--font-mono);
+  overflow-wrap: anywhere;
+}
+
+/* 未来执行时间列表 */
+.cron .cron-runs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-s);
+  overflow: hidden;
+}
+
+.cron .cron-run {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 12px;
+  padding: 7px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.cron .cron-run:last-child {
+  border-bottom: none;
+}
+
+.cron .cron-run:nth-child(odd) {
+  background: var(--bg-inset);
+}
+
+.cron .cron-run-time {
+  font-size: 14px;
+}
+
+.cron .cron-run-meta {
+  color: var(--fg-muted);
+  font-size: 12px;
+}
+
+/* 「永远不会执行」提示 */
+.cron .cron-never {
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-s);
+  background: var(--bg-inset);
+  color: var(--fg-2);
+  padding: 12px 14px;
+}
+
+/* 窄屏微调 */
+@media (max-width: 560px) {
+  .cron .cron-run {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+
+  .cron .cron-controls {
+    flex-wrap: wrap;
+  }
+}
