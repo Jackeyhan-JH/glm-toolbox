@@ -1,0 +1,205 @@
+/* 进制转换与位运算私有样式（经 ctx.loadStyle 加载，切换工具时自动移除）。
+   通用样式（按钮 / 表单 / 提示框等）见 assets/css/base.css，这里只写工具特有的部分。 */
+
+.number-base .tool-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 14px;
+  margin-bottom: 14px;
+}
+
+.number-base .tool-title {
+  font-size: 20px;
+}
+
+.number-base .tool-desc {
+  color: var(--fg-muted);
+  flex: 1 1 240px;
+}
+
+.number-base .tool-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* ---------- 选项行 ---------- */
+
+.number-base .nb-options {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  margin-bottom: 16px;
+  padding: 10px 12px;
+  background: var(--bg-inset);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-m);
+}
+
+.number-base .nb-options .field-label {
+  margin-bottom: 0;
+}
+
+.number-base .nb-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+}
+
+/* ---------- 分区 ---------- */
+
+.number-base .nb-section {
+  margin-bottom: 22px;
+}
+
+.number-base .nb-section-title {
+  font-size: 15px;
+  margin-bottom: 10px;
+}
+
+/* ---------- 单行：标签 + 值 + 复制 ---------- */
+
+.number-base .nb-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.number-base .nb-row-label {
+  flex: 0 0 4.5em;
+  font-weight: 500;
+  color: var(--fg-2);
+}
+
+.number-base .nb-row-label-wide {
+  flex-basis: 8.5em;
+}
+
+.number-base .nb-row input[type='text'] {
+  flex: 1 1 200px;
+  min-width: 120px;
+  font-family: var(--font-mono);
+}
+
+.number-base .nb-custom-sep {
+  color: var(--fg-muted);
+}
+
+.number-base #number-base-custom-base {
+  width: 4.5em;
+  text-align: center;
+}
+
+.number-base .nb-value {
+  flex: 1 1 200px;
+  min-width: 120px;
+  padding: 7px 10px;
+  font-size: 13.5px;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+/* ---------- 位运算表单 ---------- */
+
+.number-base .nb-op-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  margin-bottom: 8px;
+}
+
+.number-base .nb-op-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.number-base .nb-op-item .field-label {
+  margin-bottom: 4px;
+}
+
+.number-base .nb-op-item input,
+.number-base .nb-op-item select {
+  min-width: 0;
+}
+
+.number-base #number-base-op-a,
+.number-base #number-base-op-b {
+  width: 220px;
+  font-family: var(--font-mono);
+}
+
+/* ---------- 提示（超出范围等） ---------- */
+
+.number-base .nb-warn {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: var(--danger);
+  overflow-wrap: anywhere;
+}
+
+/* ---------- 位网格 ---------- */
+
+.number-base .nb-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.number-base .nb-bit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 42px;
+  padding: 2px 0;
+  font: inherit;
+  color: var(--fg);
+  background: var(--bg-raise);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-s);
+  cursor: pointer;
+}
+
+.number-base .nb-bit:hover {
+  background: var(--bg-inset);
+}
+
+.number-base .nb-bit .nb-bit-value {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  line-height: 1.2;
+  font-weight: 600;
+}
+
+.number-base .nb-bit .nb-bit-index {
+  font-size: 10px;
+  line-height: 1.2;
+  color: var(--fg-muted);
+}
+
+.number-base .nb-bit.is-on {
+  color: var(--accent-fg);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.number-base .nb-bit.is-on:hover {
+  background: var(--accent-hover);
+}
+
+.number-base .nb-bit.is-on .nb-bit-index {
+  color: var(--accent-fg);
+}
+
+/* 窄屏：位网格格子略缩小，行标签与输入自然换行（row 已 flex-wrap） */
+@media (max-width: 900px) {
+  .number-base .nb-bit {
+    width: 28px;
+    height: 40px;
+  }
+}

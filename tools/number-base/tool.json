@@ -1,0 +1,8 @@
+{
+  "id": "number-base",
+  "name": "进制转换",
+  "description": "任意进制互转，补码查看与位运算",
+  "category": "number",
+  "keywords": ["进制", "进制转换", "二进制", "八进制", "十进制", "十六进制", "hex", "binary", "octal", "decimal", "位运算", "bitwise", "补码", "移位", "jinzhi"],
+  "order": 10
+}
