@@ -1,0 +1,243 @@
+/* 时间戳转换私有样式（经 ctx.loadStyle 加载，切换工具时自动移除）。
+   通用样式（按钮 / 表单 / 布局组件）见 assets/css/base.css，
+   颜色一律引用 assets/css/theme.css 的变量。 */
+
+.timestamp .tool-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 14px;
+  margin-bottom: 14px;
+}
+
+.timestamp .tool-title {
+  font-size: 20px;
+}
+
+.timestamp .tool-desc {
+  color: var(--fg-muted);
+  flex: 1 1 240px;
+}
+
+/* 本工具多处用 display:flex/grid 覆盖了 hidden 的默认 display:none，这里显式恢复 */
+.timestamp [hidden] {
+  display: none !important;
+}
+
+/* ---------- 面板 ---------- */
+
+.timestamp-panel {
+  background: var(--bg-raise);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-m);
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+
+.timestamp-panel-title {
+  font-size: 15px;
+  margin-bottom: 10px;
+}
+
+.timestamp-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--fg-2);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* ---------- 当前时间 ---------- */
+
+.timestamp-now-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px 16px;
+  align-items: end;
+}
+
+.timestamp-now-value {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.timestamp-now-value code {
+  font-size: 16px;
+  font-weight: 600;
+  padding: 2px 8px;
+  overflow-wrap: anywhere;
+}
+
+.timestamp-now-item-actions {
+  display: flex;
+  align-items: end;
+  justify-content: flex-end;
+}
+
+/* ---------- 时区表格 ---------- */
+
+.timestamp-table-wrap {
+  overflow-x: auto; /* 窄屏时表格自身滚动，页面不出现横向滚动 */
+  margin: 12px 0 4px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-s);
+}
+
+.timestamp-table {
+  width: 100%;
+  min-width: 620px;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.timestamp-table th,
+.timestamp-table td {
+  padding: 7px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.timestamp-table thead th {
+  color: var(--fg-muted);
+  font-weight: 500;
+  font-size: 12px;
+  background: var(--bg-inset);
+}
+
+.timestamp-table tbody tr:last-child th,
+.timestamp-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.timestamp-table tbody tr:hover {
+  background: var(--bg-inset);
+}
+
+.timestamp-zone-name {
+  font-weight: 500;
+  color: var(--fg-2);
+}
+
+.timestamp-datetime,
+.timestamp-offset {
+  font-family: var(--font-mono);
+}
+
+.timestamp-empty-row td {
+  color: var(--fg-muted);
+  font-style: normal;
+  text-align: center;
+  padding: 18px 10px;
+}
+
+.timestamp-row-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.timestamp-zone-remove:hover {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+/* ---------- ISO / RFC / 相对时间 ---------- */
+
+.timestamp-extra {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.timestamp-extra-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.timestamp-extra-row dt {
+  min-width: 120px;
+  color: var(--fg-2);
+  font-weight: 500;
+}
+
+.timestamp-extra-row dd {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.timestamp-amb-note {
+  margin: 0;
+}
+
+.timestamp-amb-row dt {
+  min-width: 200px;
+}
+
+/* ---------- 添加时区 ---------- */
+
+.timestamp-zone-add {
+  position: relative;
+  margin-top: 12px;
+}
+
+.timestamp-zone-add-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.timestamp-zone-add-row input {
+  flex: 1 1 220px;
+}
+
+.timestamp-zone-options {
+  position: absolute;
+  z-index: 20;
+  left: 0;
+  right: 0;
+  top: calc(100% + 4px);
+  max-height: 260px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  background: var(--bg-raise);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-s);
+  box-shadow: var(--shadow-m);
+}
+
+.timestamp-zone-option {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 8px;
+  border-radius: var(--radius-s);
+  cursor: pointer;
+}
+
+.timestamp-zone-option:hover,
+.timestamp-zone-option:focus-visible {
+  background: var(--accent-weak);
+}
+
+.timestamp-zone-option-name {
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+.timestamp-zone-option-offset {
+  color: var(--fg-muted);
+  font-size: 12px;
+  white-space: nowrap;
+}

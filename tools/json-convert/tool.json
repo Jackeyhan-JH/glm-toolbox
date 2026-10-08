@@ -1,0 +1,8 @@
+{
+  "id": "json-convert",
+  "name": "JSON 转换",
+  "description": "JSON 与 YAML、CSV 互相转换",
+  "category": "data",
+  "keywords": ["json", "yaml", "csv", "转换", "zhuanhuan", "excel", "互转", "huzhuan", "表格"],
+  "order": 20
+}

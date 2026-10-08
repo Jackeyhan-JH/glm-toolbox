@@ -1,0 +1,80 @@
+/* JSON 转换私有样式（经 ctx.loadStyle 加载，切换工具时自动移除）。
+   通用样式（按钮 / 两栏布局 / 表单控件等）见 assets/css/base.css。 */
+
+.json-convert .tool-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 14px;
+  margin-bottom: 14px;
+}
+
+.json-convert .tool-title {
+  font-size: 20px;
+}
+
+.json-convert .tool-desc {
+  color: var(--fg-muted);
+  flex: 1 1 240px;
+}
+
+.json-convert .tool-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* 方向切换 + 选项行：窄屏自动换行，避免横向滚动 */
+.json-convert-controls {
+  row-gap: 10px;
+}
+
+.json-convert-controls .seg {
+  flex-wrap: wrap;
+}
+
+.option-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--fg-2);
+  white-space: nowrap;
+}
+
+.option-item input[type='checkbox'] {
+  margin: 0;
+  width: 15px;
+  height: 15px;
+  accent-color: var(--accent);
+}
+
+/* 提示条（多文档 / 自动识别分隔符等非错误信息） */
+.notice-box {
+  margin: 0 0 10px;
+  padding: 7px 12px;
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius-s);
+  background: var(--accent-weak);
+  color: var(--fg-2);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+/* 输入 / 输出两栏：等高撑开，窄屏由 two-col 自动堆叠 */
+.json-convert-pane {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  min-width: 0;
+}
+
+.json-convert-pane textarea {
+  flex: 1;
+  min-height: 300px;
+}
+
+#json-convert-output {
+  background: var(--bg-inset);
+  white-space: pre; /* 配合 wrap="off"：不做软换行，降低超大结果的排版耗时 */
+  overflow-x: auto;
+}

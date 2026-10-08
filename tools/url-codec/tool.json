@@ -1,0 +1,8 @@
+{
+  "id": "url-codec",
+  "name": "URL 编解码",
+  "description": "URL 编码解码，拆解与编辑查询参数",
+  "category": "encode",
+  "keywords": ["url", "url编码", "urlencode", "urldecode", "编码", "解码", "参数", "query", "查询字符串", "bianma", "jiema", "转义"],
+  "order": 20
+}
