@@ -1,0 +1,8 @@
+{
+  "id": "escape",
+  "name": "转义工具",
+  "description": "HTML 实体、Unicode 转义与 JS 字符串转义互转",
+  "category": "encode",
+  "keywords": ["html", "entity", "实体", "unicode", "转义", "escape", "zhuanyi", "还原", "huanyuan", "字符串", "zifuchuan", "代理对"],
+  "order": 30
+}
