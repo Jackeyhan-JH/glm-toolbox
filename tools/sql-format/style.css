@@ -1,0 +1,81 @@
+/* SQL 格式化私有样式（经 ctx.loadStyle 加载，切换工具时自动移除）。
+   通用样式（按钮 / 表单 / 两栏布局 / 错误提示等）见 assets/css/base.css，
+   颜色一律引用 assets/css/theme.css 的变量。 */
+
+.sql-format .tool-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 14px;
+  margin-bottom: 14px;
+}
+
+.sql-format .tool-title {
+  font-size: 20px;
+}
+
+.sql-format .tool-desc {
+  color: var(--fg-muted);
+  flex: 1 1 240px;
+}
+
+.sql-format .tool-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* 选项行：分段切换 + 各下拉框纵向成组，窄屏自动换行 */
+.sql-format-options {
+  align-items: flex-end;
+}
+
+.sql-format-options .seg {
+  margin-bottom: 2px;
+}
+
+.sql-format-opt {
+  display: flex;
+  flex-direction: column;
+}
+
+.sql-format-opt .field-label {
+  margin-bottom: 4px;
+}
+
+.sql-format-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  color: var(--fg-2);
+  cursor: pointer;
+}
+
+/* 输入 / 输出等高，输出用嵌入底色并弱化光标感（只读） */
+.sql-format-editor,
+.sql-format-result {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.sql-format-editor textarea,
+.sql-format-result textarea {
+  flex: 1;
+  min-height: 300px;
+}
+
+.sql-format-result textarea {
+  background: var(--bg-inset);
+}
+
+.sql-format-status {
+  margin-top: 0;
+}
+
+/* 窄屏时两栏堆叠（two-col 已处理），输出略低于输入 */
+@media (max-width: 900px) {
+  .sql-format-result {
+    margin-top: 4px;
+  }
+}
