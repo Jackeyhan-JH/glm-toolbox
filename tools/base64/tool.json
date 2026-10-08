@@ -1,0 +1,8 @@
+{
+  "id": "base64",
+  "name": "Base64",
+  "description": "文本、图片、文件与 Base64 互相转换",
+  "category": "encode",
+  "keywords": ["base64", "b64", "编码", "解码", "图片", "文件", "data url", "bianma", "jiema", "tupian", "wenjian"],
+  "order": 10
+}
