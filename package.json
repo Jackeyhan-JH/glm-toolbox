@@ -1,0 +1,23 @@
+{
+  "name": "glm-toolbox",
+  "version": "0.1.0",
+  "description": "码工具箱：纯前端、离线可用的中文开发者工具合集",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "node scripts/serve.mjs",
+    "gen-index": "node scripts/gen-index.mjs",
+    "check": "node scripts/check.mjs",
+    "build": "node scripts/build.mjs",
+    "pretest": "node scripts/gen-index.mjs",
+    "test": "node --test \"scripts/**/*.test.mjs\" \"tools/**/*.test.mjs\"",
+    "e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "^1.64.0"
+  }
+}
