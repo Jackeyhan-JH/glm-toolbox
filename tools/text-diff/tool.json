@@ -1,0 +1,8 @@
+{
+  "id": "text-diff",
+  "name": "文本对比",
+  "description": "按行、词或字符对比两段文本的差异",
+  "category": "text",
+  "keywords": ["diff", "对比", "比较", "差异", "compare", "duibi", "文本", "text", "unified"],
+  "order": 20
+}
