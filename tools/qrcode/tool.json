@@ -1,0 +1,8 @@
+{
+  "id": "qrcode",
+  "name": "二维码",
+  "description": "生成二维码（PNG / SVG），识别图片中的二维码",
+  "category": "web",
+  "keywords": ["qrcode", "qr", "二维码", "扫码", "识别", "erweima", "生成", "saomiao", "scan"],
+  "order": 30
+}
