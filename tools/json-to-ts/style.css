@@ -1,0 +1,76 @@
+/* JSON 转 TS 类型私有样式（经 ctx.loadStyle 加载，切换工具时自动移除）。
+   通用样式（按钮 / 分段切换 / 两栏布局 / 输出框等）见 assets/css/base.css，
+   颜色一律引用 assets/css/theme.css 中的变量。 */
+
+.json-to-ts .tool-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 14px;
+  margin-bottom: 14px;
+}
+
+.json-to-ts .tool-title {
+  font-size: 20px;
+}
+
+.json-to-ts .tool-desc {
+  color: var(--fg-muted);
+  flex: 1 1 240px;
+}
+
+.json-to-ts .tool-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* 选项行：根类型名 / 声明方式 / export / 可选属性写法 */
+.json-to-ts-options {
+  padding: 10px 12px;
+  background: var(--bg-raise);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-m);
+}
+
+.json-to-ts-options .option {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--fg-2);
+}
+
+.json-to-ts-options input[type='text'] {
+  width: 130px;
+  padding: 4px 8px;
+}
+
+.json-to-ts-editor {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.json-to-ts-editor textarea {
+  flex: 1;
+  min-height: 320px;
+}
+
+.json-to-ts-result {
+  display: flex;
+  flex-direction: column;
+}
+
+.json-to-ts-output {
+  flex: 1;
+  min-height: 320px;
+  margin: 0;
+  white-space: pre;
+  overflow: auto;
+}
+
+/* 窄屏时输出挪到输入框下方（two-col 已处理），微调间距 */
+@media (max-width: 900px) {
+  .json-to-ts-result {
+    margin-top: 4px;
+  }
+}

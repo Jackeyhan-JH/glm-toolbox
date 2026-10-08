@@ -1,0 +1,8 @@
+{
+  "id": "json-to-ts",
+  "name": "JSON 转 TS 类型",
+  "description": "根据 JSON 样例生成 TypeScript 接口定义",
+  "category": "data",
+  "keywords": ["json", "typescript", "ts", "interface", "类型", "leixing"],
+  "order": 30
+}
