@@ -23,6 +23,9 @@ jobs:
       - name: 清单与约定检查
         run: npm run check
 
+      - name: README 工具清单检查
+        run: node scripts/gen-readme.mjs --check
+
       - name: 单元测试
         run: npm test
 
