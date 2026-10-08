@@ -103,6 +103,101 @@ test('4 空格缩进：id, 前有 4 个空格', () => {
   assert.ok(out.includes('\n    id,'), JSON.stringify(out));
 });
 
+/* ---------------- 复验修复（评审反馈的阻塞问题） ---------------- */
+
+test('表别名通配符 u.* 后 FROM 正确换行', () => {
+  assert.equal(
+    formatSql('select u.* from users u where u.id=1', DEFAULTS),
+    `SELECT
+  u.*
+FROM
+  users u
+WHERE
+  u.id = 1`,
+  );
+});
+
+test('FROM (子查询) 的括号组缩进正确', () => {
+  assert.equal(
+    formatSql('select * from (select id from a) t', DEFAULTS),
+    `SELECT
+  *
+FROM
+  (
+    SELECT
+      id
+    FROM
+      a
+  ) t`,
+  );
+});
+
+test('PostgreSQL 数组类型 text[] 后 FROM 换行且方括号内无多余空格', () => {
+  const out = formatSql('select a::text[] from t', { ...DEFAULTS, dialect: 'postgresql' });
+  assert.ok(out.includes('a::text[]\nFROM'), out);
+  assert.ok(!out.includes('[ ]'), out);
+  const sub = formatSql('select arr[1], m[2][3] from t', { ...DEFAULTS, dialect: 'postgresql' });
+  assert.ok(sub.includes('arr[1],'), sub);
+  assert.ok(sub.includes('m[2][3]'), sub);
+});
+
+test('压缩 select * from t 保留星号后的空格', () => {
+  assert.equal(compressSql('select * from t', DEFAULTS), 'SELECT * FROM t');
+  assert.equal(compressSql('with c as (select 1) select * from c', DEFAULTS), 'WITH c AS (SELECT 1) SELECT * FROM c');
+  const fmt = formatSql('select * from t where a in (select * from x)', DEFAULTS);
+  assert.ok(fmt.includes('SELECT\n  *\nFROM'), fmt);
+});
+
+/* ---------------- 复验修复（非阻塞问题） ---------------- */
+
+test('MySQL # 行注释压缩不丢字符', () => {
+  assert.equal(
+    compressSql('select a #abc\nfrom t', { ...DEFAULTS, dialect: 'mysql' }),
+    'SELECT a /* abc */ FROM t',
+  );
+});
+
+test('行注释内容含 */ 时压缩结果仍是合法 SQL', () => {
+  const out = compressSql('select 1 -- a */ b\n, 2', DEFAULTS);
+  assert.equal(out, 'SELECT 1 /* a * / b */, 2');
+  // 只有一个块注释终止符
+  assert.equal(out.lastIndexOf('*/'), out.indexOf('*/'));
+});
+
+test('语句开头的注释：格式化顶格、压缩后与 SELECT 之间有空格', () => {
+  assert.equal(formatSql('-- head\nselect 1', DEFAULTS), '-- head\nSELECT\n  1');
+  assert.equal(compressSql('-- head\nselect 1', DEFAULTS), '/* head */ SELECT 1');
+  assert.equal(formatSql('/* head */ select 1', DEFAULTS), '/* head */\nSELECT\n  1');
+});
+
+test('窗口函数：OVER 后有空格，PARTITION BY / ORDER BY / NULLS 大小写统一', () => {
+  const out = formatSql('select row_number() over (partition by a order by b nulls last) from t', DEFAULTS);
+  assert.ok(out.includes('row_number() OVER ('), out);
+  assert.ok(
+    out.includes(`OVER (
+    PARTITION BY
+      a
+    ORDER BY
+      b NULLS LAST
+  )`),
+    out,
+  );
+});
+
+test('INSERT INTO 表名与列清单之间保留空格（不像函数调用）', () => {
+  const out = formatSql("insert into t (a,b) values(1,'x')", DEFAULTS);
+  assert.ok(out.includes('t (a, b)'), out);
+  const q = formatSql('insert into `t` (a) values(1)', { ...DEFAULTS, dialect: 'mysql' });
+  assert.ok(q.includes('`t` (a)'), q);
+  // 函数调用的紧凑风格不受影响
+  assert.ok(formatSql('select count(*) from t', DEFAULTS).includes('count(*)'));
+});
+
+test('MySQL 反斜杠转义的字符串不报未闭合', () => {
+  const out = formatSql("select 'it\\'s' from t", { ...DEFAULTS, dialect: 'mysql' });
+  assert.ok(out.includes("'it\\'s'"), out);
+});
+
 /* ---------------- 更多边界 ---------------- */
 
 test("字符串 '' 转义与内容原样保留", () => {

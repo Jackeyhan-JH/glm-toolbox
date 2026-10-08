@@ -64,6 +64,7 @@ export async function mount(root, ctx) {
     placeholder: '格式化结果将显示在这里',
     readonly: '',
     spellcheck: 'false',
+    wrap: 'off', // 结果按行展示，长行横向滚动而不是自动折行，避免误读
   });
 
   const statusBox = el('div', { class: 'sql-format-status', 'data-testid': 'sql-format-status' });

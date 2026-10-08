@@ -67,6 +67,7 @@
 
 .sql-format-result textarea {
   background: var(--bg-inset);
+  white-space: pre; /* 配合 wrap="off"：长行不折行，横向滚动 */
 }
 
 .sql-format-status {

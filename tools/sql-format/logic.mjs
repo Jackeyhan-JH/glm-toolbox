@@ -61,7 +61,7 @@ const BASE_KEYWORDS = new Set(
    DROP EACH ELSE END ESCAPE EXCEPT EXCLUSIVE EXISTS EXPLAIN FAIL FETCH FIRST
    FOREIGN FROM FULL GLOB GRANT GROUP HAVING IF IGNORE IMMEDIATE IN INDEX INNER
    INSERT INSTEAD INTERSECT INTO IS ISNULL JOIN KEY LAST LEFT LIKE LIMIT MATCH
-   NATURAL NOT NOTNULL NULL OF OFFSET ON OR ORDER OUTER PLAN PRAGMA PRIMARY QUERY
+   NATURAL NOT NOTNULL NULL NULLS OF OFFSET ON OR ORDER OUTER OVER PARTITION PLAN PRAGMA PRIMARY QUERY
    RAISE RECURSIVE REFERENCES REGEXP REINDEX RELEASE RENAME REPLACE RESTRICT
    RETURNING RIGHT ROLLBACK ROW ROWS SAVEPOINT SELECT SET TABLE TEMP TEMPORARY
    THEN TO TRANSACTION TRIGGER TRUE FALSE UNKNOWN UNION UNIQUE UPDATE USING
@@ -86,7 +86,7 @@ const DIALECT_KEYWORDS = {
 /** 会开启新「主句」的关键字（语句顶格独占一行） */
 const CLAUSE_STARTERS = new Set(
   `SELECT FROM WHERE GROUP HAVING ORDER LIMIT OFFSET FETCH UNION INTERSECT EXCEPT
-   VALUES SET RETURNING WITH WINDOW INSERT REPLACE UPDATE DELETE CREATE DROP ALTER
+   VALUES SET RETURNING WITH WINDOW INSERT REPLACE UPDATE DELETE CREATE DROP ALTER PARTITION
    RENAME TRUNCATE GRANT REVOKE EXPLAIN ANALYZE VACUUM BEGIN COMMIT ROLLBACK START
    SHOW DESCRIBE USE CALL ATTACH DETACH PRAGMA`.split(/\s+/).filter(Boolean),
 );
@@ -99,6 +99,7 @@ const CLAUSE_ABSORB = {
   EXCEPT: ['ALL', 'DISTINCT'],
   GROUP: ['BY'],
   ORDER: ['BY'],
+  PARTITION: ['BY'],
   INSERT: ['INTO'],
   REPLACE: ['INTO'],
   DELETE: ['FROM'],
@@ -146,7 +147,7 @@ const RE_DOLLAR_TAG = /\$(?:[A-Za-z_][A-Za-z_0-9]*)?\$/y; // PostgreSQL $$ / $ta
 const MULTI_OPERATORS = ['->>', '<<=', '>>=', '||', '<<', '>>', '<=', '>=', '<>', '!=', ':=', '::', '->', '=>'];
 const SINGLE_OPERATORS = new Set('=<>+-*/%^|&~!');
 
-const PUNCTUATIONS = new Set([',', ';', '(', ')', '.']);
+const PUNCTUATIONS = new Set([',', ';', '(', ')', '.', '[', ']']);
 
 /** 记为「值结尾」的 token 类型：决定前导点号是否属于数字（.5） */
 const VALUEY_TYPES = new Set(['word', 'number', 'string', 'quoted', 'param']);
@@ -201,6 +202,10 @@ export function tokenize(sql, { dialect = 'standard' } = {}) {
         }
         j += 1;
         break;
+      }
+      if (ch === '\\' && dialect === 'mysql' && j + 1 < n) {
+        j += 2; // MySQL 反斜杠转义：'it\'s'（其余方言不把 \ 当转义）
+        continue;
       }
       j += 1;
     }
@@ -339,17 +344,20 @@ export function tokenize(sql, { dialect = 'standard' } = {}) {
 
   return tokens;
 
-  /** 压入运算符；一元 +/- 与独立星号（SELECT * / count(*)）依上下文标记 */
+  /** 压入运算符；一元 +/-（紧贴操作数）与独立星号（SELECT * / u.* / count(*)）依上下文标记 */
   function pushOperator(text) {
     const extra = {};
-    if (text === '-' || text === '+' || text === '*') {
-      const prev = tokens[tokens.length - 1];
-      const unaryContext =
-        !prev ||
-        prev.type === 'operator' ||
-        (prev.type === 'punct' && (prev.text === '(' || prev.text === ',')) ||
-        (prev.type === 'word' && prev.isKeyword);
-      extra.unary = unaryContext;
+    const prev = tokens[tokens.length - 1];
+    const standaloneContext =
+      !prev ||
+      prev.type === 'operator' ||
+      (prev.type === 'punct' && (prev.text === '(' || prev.text === ',')) ||
+      (prev.type === 'word' && prev.isKeyword);
+    if (text === '-' || text === '+') {
+      extra.unary = standaloneContext;
+    } else if (text === '*') {
+      // 独立星号（通配符）：两侧仍保留空格（SELECT * FROM），但允许其后的主句关键字换行
+      extra.wildcard = standaloneContext || (prev !== undefined && prev.type === 'punct' && prev.text === '.');
     }
     push('operator', text, extra);
   }
@@ -417,10 +425,16 @@ function needSpace(prev, token) {
   const t = token.type;
   const x = token.text;
 
+  // 注释与相邻 token 之间总保留空格（逗号 / 分号仍紧贴前文）
+  if (prev.type === 'lineComment' || prev.type === 'blockComment') {
+    return !(t === 'punct' && (x === ',' || x === ';'));
+  }
+
   if (t === 'punct') {
-    if (x === ',' || x === ';' || x === ')' || x === '.') return false;
+    if (x === ',' || x === ';' || x === ')' || x === '.' || x === ']') return false;
     if (x === '(') {
-      // 函数调用名后不加空格：count( ；关键字后保留：IN (
+      // 函数调用名后不加空格：count( ；关键字后保留：IN ( ；INSERT INTO 的表名后保留：t (a, b)
+      if (prev.isTableRef) return true;
       if (prev.type === 'word' && !prev.isKeyword) return false;
       if (prev.type === 'punct' && (prev.text === ')' || prev.text === '.')) return false;
       if (prev.type === 'number' || prev.type === 'string' || prev.type === 'quoted' || prev.type === 'param') {
@@ -428,17 +442,25 @@ function needSpace(prev, token) {
       }
       return true;
     }
+    if (x === '[') {
+      // 数组下标 / 类型维度紧跟值之后：arr[1]、text[]
+      if (prev.type === 'word' || prev.type === 'number' || prev.type === 'quoted' || prev.type === 'param') {
+        return false;
+      }
+      if (prev.type === 'punct' && (prev.text === ')' || prev.text === ']')) return false;
+      return true;
+    }
     return true;
   }
   if (prev.type === 'punct') {
-    if (prev.text === '(') return false;
-    if (prev.text === '.') return false;
+    if (prev.text === '(' || prev.text === '.') return false;
+    if (prev.text === '[') return false;
     return true;
   }
   if (prev.type === 'operator') {
     if (prev.text === '::') return false;
     if (prev.unary) return false;
-    return true;
+    return true; // 含独立星号：SELECT * FROM
   }
   if (t === 'operator') {
     if (x === '::') return false;
@@ -473,6 +495,7 @@ function layoutStatement(tokens, opts) {
   let afterClauseHeader = false; // 刚输出主句头部、尚无内容（抑制把 REPLACE( 等误判为主句）
   let clauseExpectsQuery = false; // 当前主句是集合运算（UNION…），其后紧跟的 SELECT 是新查询
   let betweenPending = false; // 上一个词是 BETWEEN：其范围里的 AND 不换行（BETWEEN 1 AND 9）
+  let tableListPending = false; // INSERT INTO / REPLACE INTO 之后：表名与列清单之间保留空格
 
   const canBreak = () => groups.every((g) => g.block);
   const indentStr = (level) => ' '.repeat(indent * level);
@@ -489,7 +512,7 @@ function layoutStatement(tokens, opts) {
     line = { indent: targetIndent, parts: [] };
   };
   const appendRaw = (token) => {
-    if (!line) startLine(contentIndent);
+    if (!line) startLine(prevSig ? contentIndent : headerIndent); // 语句开头的 token（注释 / ( 等）顶格
     if (line.parts.length > 0 && needSpace(prevSig, token)) line.parts.push(' ');
     line.parts.push(renderToken(token, opts));
     if (token.type !== 'lineComment' && token.type !== 'blockComment') {
@@ -526,15 +549,17 @@ function layoutStatement(tokens, opts) {
     pendingIndent = contentIndent;
     afterClauseHeader = true;
     clauseExpectsQuery = SET_OPS.has(tokens[index].text.toUpperCase());
+    tableListPending = tokens[index].text.toUpperCase() === 'INSERT' || tokens[index].text.toUpperCase() === 'REPLACE';
     return j - 1; // 外层循环从返回值继续
   };
   /** 主句关键字在此处能否断句：须处于可断行上下文，且不像 SELECT REPLACE( / a, COUNT( 中的函数位置。
-   *  例外：跟在「(」后的 SELECT 是子查询开头；独立星号（SELECT * FROM）与集合运算后的查询允许断句。 */
+   *  例外：跟在「(」或值结尾标点（] 等）后的 SELECT 是子查询开头；独立星号（u.* / SELECT *）
+   *  与集合运算后的查询允许断句。 */
   const clauseAllowed = () => {
     if (!canBreak()) return false;
     if (afterClauseHeader && !clauseExpectsQuery) return false;
     if (!prevSig) return true;
-    if (prevSig.type === 'operator' && !prevSig.unary) return false;
+    if (prevSig.type === 'operator' && !prevSig.unary && !prevSig.wildcard) return false;
     if (prevSig.type === 'punct' && prevSig.text === ',') return false;
     return true;
   };
@@ -545,6 +570,7 @@ function layoutStatement(tokens, opts) {
 
     // 字符串 / 引号标识符 / 数字 / 参数 / 普通关键字：直接追加
     if (token.type === 'string' || token.type === 'quoted' || token.type === 'number' || token.type === 'param') {
+      if (tableListPending && token.type === 'quoted') token.isTableRef = true;
       appendTok(token);
       continue;
     }
@@ -587,6 +613,7 @@ function layoutStatement(tokens, opts) {
         joinOn = true; // 后续 AND/OR 缩进一级
       }
       if (upper === 'BETWEEN') betweenPending = true;
+      if (tableListPending && !token.isKeyword) token.isTableRef = true;
       appendTok(token);
       continue;
     }
@@ -594,8 +621,9 @@ function layoutStatement(tokens, opts) {
     if (token.type === 'punct') {
       if (token.text === '(') {
         const block = canBreak() && groupHasClause(tokens, i);
-        const openIndent = line ? line.indent : (pendingIndent !== null ? pendingIndent : contentIndent);
-        appendTok(token);
+        appendTok(token); // 先落位（可能按 pendingIndent 另起一行），再取「(」实际所在行的缩进
+        tableListPending = false; // 表名后遇到列清单「(」即结束
+        const openIndent = line ? line.indent : contentIndent;
         if (block) {
           flush();
           groups.push({ block: true, savedHeader: headerIndent, savedContent: contentIndent, close: openIndent });
@@ -654,8 +682,15 @@ function layoutStatement(tokens, opts) {
     }
     if (token.type === 'blockComment') {
       if (canBreak() && token.text.includes('\n')) {
-        // 跨行块注释独占一行，保持原文
-        const ind = pendingIndent !== null ? pendingIndent : line && line.parts.length > 0 ? line.indent : contentIndent;
+        // 跨行块注释独占一行，保持原文；语句开头的注释顶格
+        const ind =
+          pendingIndent !== null
+            ? pendingIndent
+            : line && line.parts.length > 0
+              ? line.indent
+              : prevSig
+                ? contentIndent
+                : headerIndent;
         startLine(ind);
         appendRaw(token);
         flush();
@@ -691,9 +726,11 @@ export function formatSql(sql, options = {}) {
     .join('\n\n');
 }
 
-/** 把「-- 内容」改写为「/* 内容 *\/」（去首尾空白，两侧各留一个空格；空注释写成 /\**\/） */
+/** 把「-- 内容」/「# 内容」改写为「/* 内容 *\/」（去首尾空白，两侧各留一个空格；空注释写成 /\**\/）。
+ *  内容里的「*\/」会提前截断块注释，改写为「* /」规避。 */
 function lineCommentToBlock(text) {
-  const content = text.slice(2).trim();
+  const markerLen = text.startsWith('--') ? 2 : 1;
+  const content = text.slice(markerLen).trim().replace(/\*\//g, '* /');
   return content === '' ? '/**/' : `/* ${content} */`;
 }
 
@@ -706,7 +743,7 @@ export function compressSql(sql, options = {}) {
   if (typeof sql !== 'string' || sql.trim() === '') return '';
   const tokens = tokenize(sql, opts);
   const parts = [];
-  let prevSig = null;
+  let prev = null; // 含注释在内的上一个 token：注释与相邻内容之间保留空格
   for (const token of tokens) {
     let text;
     if (token.type === 'lineComment') {
@@ -718,9 +755,9 @@ export function compressSql(sql, options = {}) {
     } else {
       text = renderToken(token, opts);
     }
-    if (parts.length > 0 && needSpace(prevSig, token)) parts.push(' ');
+    if (parts.length > 0 && needSpace(prev, token)) parts.push(' ');
     parts.push(text);
-    if (token.type !== 'lineComment' && token.type !== 'blockComment') prevSig = token;
+    prev = token;
   }
   return parts.join('');
 }
