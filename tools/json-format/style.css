@@ -1,0 +1,167 @@
+/* JSON 格式化私有样式（经 ctx.loadStyle 加载，切换工具时自动移除）。
+   通用样式（按钮 / 表单 / 统计网格 / 两栏布局等）见 assets/css/base.css，
+   颜色一律引用 assets/css/theme.css 的变量。 */
+
+.json-format .tool-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 14px;
+  margin-bottom: 14px;
+}
+
+.json-format .tool-title {
+  font-size: 20px;
+}
+
+.json-format .tool-desc {
+  color: var(--fg-muted);
+  flex: 1 1 240px;
+}
+
+.json-format .tool-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* ---------- 工具栏 ---------- */
+
+.jf-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+  margin-bottom: 12px;
+}
+
+.jf-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--fg-2);
+  font-weight: 500;
+}
+
+.jf-check {
+  cursor: pointer;
+}
+
+.jf-spacer {
+  flex: 1 1 auto;
+}
+
+/* ---------- 输入区：行号栏 + 文本框 ---------- */
+
+.jf-editor {
+  display: flex;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-s);
+  background: var(--bg-raise);
+  overflow: hidden;
+}
+
+.jf-editor:focus-within {
+  border-color: var(--accent);
+  box-shadow: var(--focus-ring);
+}
+
+/* 行号栏与文本框必须逐行对齐：字体、行高、上下内边距保持一致 */
+.jf-gutter {
+  flex: 0 0 auto;
+  min-width: 44px;
+  padding: 7px 6px 7px 4px;
+  overflow: hidden;
+  text-align: right;
+  color: var(--fg-muted);
+  user-select: none;
+  scrollbar-width: none;
+}
+
+.jf-gutter::-webkit-scrollbar {
+  display: none;
+}
+
+.jf-gutter-line {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.5;
+  padding: 0 4px;
+  border-radius: var(--radius-s);
+}
+
+.jf-gutter-line.is-error {
+  color: var(--danger);
+  background: var(--danger-bg);
+  font-weight: 600;
+}
+
+.jf-gutter-more {
+  color: var(--fg-muted);
+}
+
+.jf-editor textarea {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 340px;
+  padding: 7px 10px;
+  border: 0;
+  background: transparent;
+  resize: none;
+}
+
+.jf-editor textarea:focus-visible {
+  box-shadow: none; /* 焦点环画在 .jf-editor 上，避免双重描边 */
+}
+
+.jf-pause-hint {
+  color: var(--warn);
+}
+
+/* ---------- 输出区 ---------- */
+
+.jf-output-col textarea {
+  min-height: 340px;
+  resize: vertical;
+}
+
+.jf-status {
+  margin-top: 10px;
+}
+
+.jf-status .ok-box,
+.jf-status .error-box {
+  margin: 0;
+}
+
+.jf-empty {
+  color: var(--fg-muted);
+  padding: 8px 12px;
+  background: var(--bg-inset);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-s);
+}
+
+.jf-error-context {
+  margin: 8px 0 0;
+  padding: 8px 10px;
+  background: var(--bg-inset);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-s);
+  color: var(--fg-2);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: pre;
+  overflow-x: auto;
+}
+
+.jf-stats {
+  margin-top: 12px;
+}
+
+/* 窄屏时输出挪到输入下方（two-col 已处理），微调间距即可 */
+@media (max-width: 900px) {
+  .jf-output-col {
+    margin-top: 4px;
+  }
+}
