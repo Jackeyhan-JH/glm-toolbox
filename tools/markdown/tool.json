@@ -1,0 +1,8 @@
+{
+  "id": "markdown",
+  "name": "Markdown 预览",
+  "description": "实时预览 Markdown，支持 GFM 并导出 HTML",
+  "category": "web",
+  "keywords": ["markdown", "md", "预览", "gfm", "readme", "yulan", "标记", "渲染", "文档", "编辑器"],
+  "order": 20
+}
