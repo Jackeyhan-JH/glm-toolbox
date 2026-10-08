@@ -1,0 +1,104 @@
+/* 简繁转换私有样式（经 ctx.loadStyle 加载，切换工具时自动移除）。
+   通用样式（按钮 / 分段控件 / 两栏布局 / 输出框等）见 assets/css/base.css，
+   颜色一律引用 assets/css/theme.css 的变量。 */
+
+.zh-convert .tool-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 14px;
+  margin-bottom: 14px;
+}
+
+.zh-convert .tool-title {
+  font-size: 20px;
+}
+
+.zh-convert .tool-desc {
+  color: var(--fg-muted);
+  flex: 1 1 240px;
+}
+
+.zh-convert .tool-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.zh-controls {
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  align-items: center;
+}
+
+.zh-opt {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--fg-2);
+  cursor: pointer;
+}
+
+.zh-opt.is-disabled {
+  color: var(--fg-muted);
+  cursor: default;
+}
+
+.zh-loading::before {
+  content: '⏳ ';
+}
+
+.zh-status .error-box {
+  margin-top: 4px;
+}
+
+.zh-pane {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.zh-pane textarea {
+  flex: 1;
+  min-height: 300px;
+}
+
+.zh-output-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.zh-count {
+  color: var(--fg-muted);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.zh-count strong {
+  color: var(--fg-2);
+  font-weight: 600;
+}
+
+/* 输出区：与 textarea 等高对齐（换行等表现沿用 output-box） */
+.zh-output {
+  flex: 1;
+  min-height: 300px;
+}
+
+/* 被转换的字加底色（浅深两套主题都使用主题变量保证可读） */
+.zh-output .zh-mark {
+  background: var(--accent-weak);
+  color: var(--fg);
+  border-radius: var(--radius-s);
+  padding: 0 1px;
+}
+
+/* 窄屏时输入 / 输出改为上下排列（two-col 已处理，这里压缩高度） */
+@media (max-width: 900px) {
+  .zh-pane textarea,
+  .zh-output {
+    min-height: 180px;
+  }
+}
