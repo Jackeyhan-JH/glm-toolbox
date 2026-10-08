@@ -1,0 +1,8 @@
+{
+  "id": "color",
+  "name": "颜色工具",
+  "description": "颜色格式互转，检查 WCAG 对比度",
+  "category": "web",
+  "keywords": ["color", "颜色", "yanse", "hex", "rgb", "hsl", "hwb", "oklch", "对比度", "wcag", "取色", "色板", "无障碍"],
+  "order": 10
+}
