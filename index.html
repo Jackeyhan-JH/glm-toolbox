@@ -4,8 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="码工具箱：纯前端、离线可用的中文开发者工具合集，数据只在浏览器本地处理。" />
+    <meta name="theme-color" content="#f5f6f8" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#15171c" media="(prefers-color-scheme: dark)" />
     <title>码工具箱 - 离线开发者工具</title>
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="assets/icons/icon-192.png" />
     <link rel="stylesheet" href="assets/css/theme.css" />
     <link rel="stylesheet" href="assets/css/base.css" />
     <link rel="stylesheet" href="assets/css/shell.css" />
@@ -29,6 +33,7 @@
     <script type="module" src="assets/js/app.mjs"></script>
   </head>
   <body>
+    <a class="skip-link" href="#content" data-skip-link>跳到主要内容</a>
     <div class="app">
       <aside class="sidebar" id="sidebar" aria-label="侧边栏">
         <a class="brand" href="#/">
@@ -64,7 +69,7 @@
             <span id="theme-btn-icon" aria-hidden="true">🌙</span>
           </button>
         </header>
-        <main class="content" id="content" aria-live="polite">
+        <main class="content" id="content" tabindex="-1" aria-live="polite">
           <div class="state-page"><p class="state-detail">正在加载…</p></div>
         </main>
       </div>

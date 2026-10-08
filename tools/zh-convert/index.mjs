@@ -134,6 +134,7 @@ export async function mount(root, ctx) {
   const output = el('div', {
     class: 'output-box zh-output',
     'data-testid': 'zh-convert-output',
+    role: 'region', // 允许命名的输出区域（div 本身的 role 不允许 aria-label）
     'aria-label': '转换结果',
   });
 

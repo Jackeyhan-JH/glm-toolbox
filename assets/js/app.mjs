@@ -106,27 +106,63 @@ searchInput.addEventListener('keydown', (event) => {
   }
 });
 
-/* 在非输入控件中按 / 聚焦搜索框 */
-document.addEventListener('keydown', (event) => {
-  if (event.key !== '/' || event.ctrlKey || event.metaKey || event.altKey) return;
-  const active = document.activeElement;
-  const tag = active?.tagName;
-  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || active?.isContentEditable) {
-    return;
-  }
-  event.preventDefault();
+/* 在非输入控件中按 / 或 Ctrl+K / ⌘K 聚焦搜索框 */
+function focusSearch() {
   searchInput.focus();
   searchInput.select();
+}
+
+function isTypingTarget(node) {
+  const tag = node?.tagName;
+  return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || node?.isContentEditable;
+}
+
+document.addEventListener('keydown', (event) => {
+  if ((event.key === 'k' || event.key === 'K') && (event.ctrlKey || event.metaKey)) {
+    event.preventDefault();
+    focusSearch();
+    return;
+  }
+  if (event.key !== '/' || event.ctrlKey || event.metaKey || event.altKey) return;
+  if (isTypingTarget(document.activeElement)) return;
+  event.preventDefault();
+  focusSearch();
+});
+
+/* 「跳到主要内容」：把焦点移到主区域。不改变 hash（避免被路由当成工具 id）。 */
+document.querySelector('[data-skip-link]')?.addEventListener('click', (event) => {
+  event.preventDefault();
+  content.focus();
+});
+
+/* 侧边栏列表：↑ / ↓ 在工具之间移动焦点 */
+navList.addEventListener('keydown', (event) => {
+  if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
+  const links = [...navList.querySelectorAll('.nav-item')];
+  if (links.length === 0) return;
+  event.preventDefault();
+  const index = links.indexOf(document.activeElement);
+  const delta = event.key === 'ArrowDown' ? 1 : -1;
+  const next = index === -1 ? (event.key === 'ArrowDown' ? 0 : links.length - 1) : (index + delta + links.length) % links.length;
+  links[next].focus();
 });
 
 /* 移动端菜单抽屉 */
 let backdrop = null;
 
-function closeSidebar() {
+function closeSidebar({ restoreFocus = false } = {}) {
+  const wasOpen = sidebar.classList.contains('open');
   sidebar.classList.remove('open');
   menuBtn.setAttribute('aria-expanded', 'false');
   backdrop?.remove();
   backdrop = null;
+  if (wasOpen && restoreFocus) menuBtn.focus();
+}
+
+function sidebarFocusables() {
+  return [...sidebar.querySelectorAll('a[href], button, input, select, textarea')].filter(
+    (n) => !n.hidden && n.offsetParent !== null,
+  );
 }
 
 menuBtn.addEventListener('click', () => {
@@ -140,13 +176,38 @@ menuBtn.addEventListener('click', () => {
       onClick: closeSidebar,
     });
     document.body.appendChild(backdrop);
+    // 焦点移入抽屉（搜索框是其中第一个可交互元素）。
+    // 下一帧再聚焦：确保 visibility 过渡已开始、元素可聚焦。
+    requestAnimationFrame(() => searchInput.focus());
   } else {
-    closeSidebar();
+    closeSidebar({ restoreFocus: true });
   }
 });
 
 sidebar.addEventListener('click', (event) => {
   if (event.target.closest('a')) closeSidebar();
+});
+
+/* 抽屉打开时：Esc 关闭并把焦点还给菜单按钮；Tab 在抽屉内循环 */
+document.addEventListener('keydown', (event) => {
+  if (!sidebar.classList.contains('open')) return;
+  if (event.key === 'Escape') {
+    event.preventDefault();
+    closeSidebar({ restoreFocus: true });
+  } else if (event.key === 'Tab') {
+    const focusables = sidebarFocusables();
+    if (focusables.length === 0) return;
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    const active = document.activeElement;
+    if (event.shiftKey && (active === first || !sidebar.contains(active))) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && (active === last || !sidebar.contains(active))) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
 });
 
 /* ==================== 工具模块协议 ctx ==================== */

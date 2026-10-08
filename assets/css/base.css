@@ -67,6 +67,19 @@ kbd {
   background: var(--accent-weak);
 }
 
+/* 尊重 prefers-reduced-motion：关闭全站过渡与动画 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0s !important;
+    transition-delay: 0s !important;
+    animation-duration: 0s !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /* ---------- 通用按钮 ---------- */
 
 .btn {
@@ -320,4 +333,25 @@ select:focus-visible {
   background: var(--ok-bg);
   color: var(--ok);
   overflow-wrap: anywhere;
+}
+
+/* ---------- 窄屏触控目标（按钮与输入控件 ≥ 40px） ---------- */
+
+@media (max-width: 767px) {
+  .btn,
+  .btn-sm,
+  .seg > button {
+    min-height: 40px;
+  }
+
+  input[type='text'],
+  input[type='search'],
+  input[type='number'],
+  input[type='password'],
+  input[type='url'],
+  input[type='email'],
+  textarea,
+  select {
+    min-height: 40px;
+  }
 }

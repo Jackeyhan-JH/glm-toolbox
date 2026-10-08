@@ -111,6 +111,12 @@
   border-radius: var(--radius-m);
 }
 
+/* 正文中的链接不能只靠颜色区分（WCAG 1.4.1），统一加下划线 */
+.md-preview a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .md-status {
   display: flex;
   gap: 14px;

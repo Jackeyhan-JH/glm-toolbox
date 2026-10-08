@@ -47,6 +47,7 @@ export async function mount(root, ctx) {
   const output = el('pre', {
     class: 'output-box json-to-ts-output',
     'data-testid': 'json-to-ts-output',
+    role: 'region', // 允许命名的输出区域（pre 本身的 role 不允许 aria-label）
     'aria-label': 'TypeScript 输出',
   });
 

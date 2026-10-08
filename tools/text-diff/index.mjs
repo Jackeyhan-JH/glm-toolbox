@@ -173,6 +173,7 @@ export async function mount(root, ctx) {
   const unifiedPre = el('pre', {
     class: 'output-box diff-unified',
     'data-testid': 'text-diff-unified',
+    role: 'region', // 允许命名的输出区域（pre 本身的 role 不允许 aria-label）
     'aria-label': 'unified diff 结果',
   });
 
