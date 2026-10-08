@@ -1,0 +1,8 @@
+{
+  "id": "random",
+  "name": "随机生成器",
+  "description": "生成 UUID、ULID、NanoID 和高强度密码",
+  "category": "crypto",
+  "keywords": ["uuid", "guid", "ulid", "nanoid", "密码", "password", "随机", "suiji", "random", "随机密码", "生成器", "shengchengqi", "uuidv4", "uuidv7"],
+  "order": 30
+}
