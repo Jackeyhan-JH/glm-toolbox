@@ -68,10 +68,12 @@ test.describe('Cron 解析：中文描述与未来执行时间', () => {
 
   test('点击「工作日 9 点」示例 → 输入框填入 0 9 * * 1-5，描述随之更新', async ({ page }) => {
     await openCron(page);
+    await page.getByLabel('时区').selectOption('America/New_York');
     await page.getByRole('button', { name: '工作日 9 点' }).click();
     await expect(page.locator(INPUT)).toHaveValue('0 9 * * 1-5');
     await expect(page.getByTestId('cron-description')).toHaveText('周一至周五 09:00');
-    await expect(page.locator(FIRST_RUN).locator('.cron-run-time')).toContainText('2026-10-09 09:00');
+    // now 为周三 23:44（纽约），下一个工作日 9 点是周四早上
+    await expect(page.locator(FIRST_RUN).locator('.cron-run-time')).toHaveText('2026-10-08 09:00 星期四');
   });
 
   test('其他示例按钮也能填入并解析（每分钟 / 每小时 / 每天 0 点 / 每月 1 号）', async ({ page }) => {
