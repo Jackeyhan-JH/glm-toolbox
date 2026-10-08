@@ -120,6 +120,45 @@ test('星期 7 与 0 等价：0 8 * * 7 与 0 8 * * 0 结果相同', () => {
   );
 });
 
+/* ==================== a/n 步长写法（无终点 → 到字段最大值） ==================== */
+
+test('0 9/2 * * *：小时展开为 9 至 23 的奇数列，当天 09:00 后是 11:00', () => {
+  const parsed = parseCron('0 9/2 * * *');
+  assert.equal(parsed.ok, true);
+  assert.deepEqual(parsed.cron.fields.hour.values, [9, 11, 13, 15, 17, 19, 21, 23]);
+  assert.equal(describeCron(parsed.cron), '从 9 点起每 2 小时');
+  assert.deepEqual(times('0 9/2 * * *', { count: 2 }), ['2026-10-08 09:00 星期四', '2026-10-08 11:00 星期四']);
+});
+
+test('0/15 * * * * 与 */15 * * * * 的执行时间完全一致', () => {
+  const a = nextRuns('0/15 * * * *', { now: NOW, tz: NY, count: 10 });
+  const b = nextRuns('*/15 * * * *', { now: NOW, tz: NY, count: 10 });
+  assert.deepEqual(a, b);
+  assert.equal(analyze('0/15 * * * *').description, analyze('*/15 * * * *').description);
+});
+
+test('a/n 在各字段都到最大值：日 1/5、月 3/4、秒 10/20、星期 5/2', () => {
+  assert.deepEqual(parseCron('0 0 1/5 * *').cron.fields.dom.values, [1, 6, 11, 16, 21, 26, 31]);
+  assert.deepEqual(parseCron('0 0 * 3/4 *').cron.fields.month.values, [3, 7, 11]);
+  assert.deepEqual(parseCron('10/20 0 0 * * *').cron.fields.sec.values, [10, 30, 50]);
+  // 星期最大输入值是 7，7 归一化为周日 0
+  assert.deepEqual(parseCron('0 0 * * 5/2').cron.fields.dow.values, [0, 5]);
+});
+
+test('a/n 起点越界仍报范围错误；纯单值与显式范围不受影响', () => {
+  assert.equal(parseCron('60/5 * * * *').message, '分钟字段超出范围（0–59）：60');
+  assert.equal(parseCron('* 24/2 * * *').message, '小时字段超出范围（0–23）：24');
+  assert.deepEqual(parseCron('9 * * * *').cron.fields.min.values, [9]);
+  assert.deepEqual(parseCron('10-40/10 * * * *').cron.fields.min.values, [10, 20, 30, 40]);
+  // 55/10：55 之后跨过最大值，只剩 55
+  assert.deepEqual(parseCron('55/10 * * * *').cron.fields.min.values, [55]);
+});
+
+test('逐段解释表展开 a/n 的取值', () => {
+  const rows = explainCron(parseCron('0 9/2 * * *').cron);
+  assert.equal(rows.find((row) => row.key === 'hour').values, '9、11、13、15、17、19、21、23');
+});
+
 /* ==================== 夏令时 ==================== */
 
 test('夏令时跳变：30 2 * * *，now = 2027-03-13 00:00（纽约）→ 跳过不存在的 03-14 02:30', () => {

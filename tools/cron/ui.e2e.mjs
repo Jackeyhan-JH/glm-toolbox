@@ -102,6 +102,17 @@ test.describe('Cron 解析：中文描述与未来执行时间', () => {
     await expect(times.nth(2)).toHaveText('2026-10-07 23:45:00 星期三');
   });
 
+  test('a/n 步长写法：0 9/2 * * * → 从 9 点起每 2 小时，当天 09:00 后是 11:00', async ({ page }) => {
+    await openCron(page);
+    await page.getByLabel('时区').selectOption('America/New_York');
+    await page.locator(INPUT).fill('0 9/2 * * *');
+    await expect(page.getByTestId('cron-description')).toHaveText('从 9 点起每 2 小时');
+    const times = page.locator('[data-testid="cron-run"] .cron-run-time');
+    await expect(times.nth(0)).toHaveText('2026-10-08 09:00 星期四');
+    await expect(times.nth(1)).toHaveText('2026-10-08 11:00 星期四');
+    await expect(times.nth(2)).toHaveText('2026-10-08 13:00 星期四');
+  });
+
   test('@daily 宏：等价展开提示 + 下一次 2026-10-08 00:00', async ({ page }) => {
     await openCron(page);
     await page.getByLabel('时区').selectOption('America/New_York');

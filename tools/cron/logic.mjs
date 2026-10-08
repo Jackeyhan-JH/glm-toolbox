@@ -100,8 +100,16 @@ function parseField(text, key) {
       to = spec.max;
     } else {
       from = resolvePoint(m[1], spec);
-      to = m[2] === undefined ? from : resolvePoint(m[2], spec);
-      if (from > to) throw new CronError('范围起点不能大于终点');
+      if (from < spec.min || from > spec.max) {
+        throw new CronError(`${spec.label}字段超出范围（${spec.min}–${spec.max}）：${from}`);
+      }
+      if (m[2] !== undefined) {
+        to = resolvePoint(m[2], spec);
+        if (from > to) throw new CronError('范围起点不能大于终点');
+      } else {
+        // a/n（不带终点）表示「从 a 到字段最大值，每 n」；不带步长的单值 a 就是 a 自身
+        to = m[3] !== undefined ? spec.max : from;
+      }
     }
 
     for (let v = from; v <= to; v += step) {
@@ -410,21 +418,32 @@ function timePhrase(minutes, hours, seconds, hasSeconds) {
   const secOmitted =
     !hasSeconds || isFullRange(seconds, 0, 59) || (seconds.length === 1 && seconds[0] === 0);
 
+  // 小时为步长序列（如 9/2 → 9、11、…、23）时的说法
+  const hourStep = stepPattern(hours, 0, 23);
+  const hourPart = hourStep
+    ? hourStep.start === 0
+      ? `每 ${hourStep.step} 小时`
+      : `从 ${hourStep.start} 点起每 ${hourStep.step} 小时`
+    : null;
+
   let main;
   const minStep = stepPattern(minutes, 0, 59);
   if (minFull && hourFull) {
     main = '每分钟';
   } else if (minStep) {
     const minPart = minStep.start === 0 ? `每 ${minStep.step} 分钟` : `从第 ${minStep.start} 分钟起每 ${minStep.step} 分钟`;
-    main = hourFull ? minPart : `${hourText(hours)}，${minPart}`;
+    main = hourFull ? minPart : `${hourPart ?? hourText(hours)}，${minPart}`;
   } else if (minutes.length === 1 && hours.length === 1) {
     main = `${pad2(hours[0])}:${pad2(minutes[0])}`;
   } else if (minutes.length === 1) {
-    main = hourFull ? `每小时的 ${pad2(minutes[0])} 分` : `${hourText(hours)}的每小时 ${pad2(minutes[0])} 分`;
+    const mm = pad2(minutes[0]);
+    if (hourFull) main = `每小时的 ${mm} 分`;
+    else if (hourPart) main = minutes[0] === 0 ? hourPart : `${hourPart}的 ${mm} 分`;
+    else main = `${hourText(hours)}的每小时 ${mm} 分`;
   } else if (hourFull) {
     main = `${joinNums(minutes)} 分`;
   } else {
-    main = `${hourText(hours)}的 ${joinNums(minutes)} 分`;
+    main = `${hourPart ?? hourText(hours)}的 ${joinNums(minutes)} 分`;
   }
 
   if (secOmitted) return main;
