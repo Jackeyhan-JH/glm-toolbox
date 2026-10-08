@@ -95,15 +95,20 @@ export function convert(mode, input, options = {}) {
       return { output: stringifyCsv(value, { delimiter: delim }), notice: '' };
     }
     case 'csv-json': {
-      const { rows, delimiter } = parseCsv(input, {
+      const { rows, delimiter, extraRows } = parseCsv(input, {
         delimiter: csvDelimiter,
         autoDetect: csvAutoDetect,
       });
-      const notice =
-        csvDelimiter === 'auto' && rows.length > 0
-          ? `已自动识别分隔符：${delimiter === '\t' ? '制表符' : delimiter === ';' ? '分号 ;' : '逗号 ,'}`
-          : '';
-      return { output: `${JSON.stringify(rows, null, 2)}\n`, notice };
+      const notices = [];
+      if (csvDelimiter === 'auto' && rows.length > 0) {
+        notices.push(
+          `已自动识别分隔符：${delimiter === '\t' ? '制表符' : delimiter === ';' ? '分号 ;' : '逗号 ,'}`,
+        );
+      }
+      if (extraRows > 0) {
+        notices.push(`有 ${extraRows} 行的列数比表头多，多出的列已忽略`);
+      }
+      return { output: `${JSON.stringify(rows, null, 2)}\n`, notice: notices.join('；') };
     }
     default:
       throw new ConvertError(`未知模式：${mode}`);

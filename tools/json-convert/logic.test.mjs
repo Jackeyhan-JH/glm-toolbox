@@ -47,7 +47,8 @@ test.describe('JSON → YAML', () => {
 
   test('验收例：字符串保型——会被误读为数字 / 布尔 / null 的字符串必须加引号', () => {
     const out = convert('json-yaml', '{"v":"123","b":"true","n":"null"}').output;
-    assert.equal(out, "v: '123'\nb: 'true'\nn: 'null'\n");
+    // 三个值都带引号；键 n 也会被 YAML 1.1 解析器读成布尔，因此同样加引号（见下一条用例）
+    assert.equal(out, "v: '123'\nb: 'true'\n'n': 'null'\n");
     // 再转回 JSON 仍是字符串
     const back = JSON.parse(convert('yaml-json', out).output);
     assert.deepEqual(back, { v: '123', b: 'true', n: 'null' });
@@ -99,6 +100,29 @@ test.describe('JSON → YAML', () => {
   test('不需要引号的字符串保持普通写法（冒号不跟空格、# 不在空白后）', () => {
     const out = stringifyYaml({ url: 'http://example.com', plain: 'a#b', q: 'a:b' });
     assert.equal(out, 'url: http://example.com\nplain: a#b\nq: a:b\n');
+  });
+
+  test('会被 YAML 1.1 解析器误读的字符串加引号（解析方向仍按 1.2）', () => {
+    const value = {
+      a: 'yes',
+      b: 'no',
+      c: 'on',
+      off: 'off',
+      y: 'y',
+      n: 'n',
+      date: '2024-01-01',
+      datetime: '2024-01-01T10:30:00Z',
+      time: '12:30',
+      hms: '1:59:59',
+      underscore: '1_000',
+    };
+    const out = stringifyYaml(value);
+    // 每个值都用单引号包住，避免 PyYAML / Ansible 等 YAML 1.1 解析器读成布尔 / 日期 / 六十进制
+    for (const v of Object.values(value)) {
+      assert.ok(out.includes(`'${v}'`), `输出应包含带引号的「${v}」：\n${out}`);
+    }
+    // 本工具按 YAML 1.2 解析，转回来仍是字符串
+    assert.deepEqual(parseYaml(out).value, value);
   });
 
   test('含换行 / 制表符的字符串用双引号转义，且能转回', () => {
@@ -184,6 +208,28 @@ test.describe('YAML → JSON', () => {
     const r = convert('yaml-json', input);
     assert.deepEqual(JSON.parse(r.output), [{ a: 1 }, { b: 2 }]);
     assert.match(r.notice, /2 个 YAML 文档/);
+  });
+
+  test('多文档中的空文档保留为 null（---\\n---\\na: 1 → [null, {"a":1}]）', () => {
+    assert.deepEqual(parseYaml('---\n---\na: 1').value, [null, { a: 1 }]);
+    assert.deepEqual(parseYaml('---\n---\n').value, [null, null]);
+    // 第一个 --- 之前、以及只有注释的内容不算文档
+    assert.deepEqual(parseYaml('a: 1\n---\nb: 2\n').value, [{ a: 1 }, { b: 2 }]);
+    assert.deepEqual(parseYaml('# 说明\n---\na: 1\n').value, { a: 1 });
+  });
+
+  test('重复键：中文报错并定位到重复的那一行（块映射与流式映射）', () => {
+    const err = assertThrowsWith(() => parseYaml('a: 1\na: 2'), '第 2 行', '重复的键「a」');
+    assert.equal(err.line, 2);
+    assertThrowsWith(() => parseYaml('"a": 1\nx:\n  b: 1\n  b: 2'), '第 4 行', '重复的键「b」');
+    assertThrowsWith(() => parseYaml('{a: 1, a: 2}'), '重复的键「a」');
+  });
+
+  test('__proto__ 作为键保留为自有属性（与 JSON.parse 一致）', () => {
+    const expected = JSON.parse('{"__proto__":{"x":1},"b":2}');
+    assert.deepEqual(parseYaml('__proto__:\n  x: 1\nb: 2').value, expected);
+    assert.deepEqual(Object.keys(parseYaml('__proto__:\n  x: 1\nb: 2').value), ['__proto__', 'b']);
+    assert.deepEqual(parseYaml('{__proto__: {x: 1}, b: 2}').value, expected);
   });
 
   test('文档结束标记 ... 之后不应再有内容', () => {
@@ -291,6 +337,14 @@ test.describe('JSON 解析（中文错误 + 行列号）', () => {
       b: { c: '中' },
     });
   });
+
+  test('__proto__ 作为键保留为自有属性且顺序与 JSON.parse 一致', () => {
+    const expected = JSON.parse('{"__proto__":{"x":1},"b":2}');
+    const parsed = parseJson('{"__proto__":{"x":1},"b":2}');
+    assert.deepEqual(parsed, expected);
+    assert.deepEqual(Object.keys(parsed), ['__proto__', 'b']);
+    assert.equal(Object.getPrototypeOf(parsed), Object.prototype); // 没被当成原型设定
+  });
 });
 
 test.describe('JSON → CSV', () => {
@@ -394,9 +448,55 @@ test.describe('CSV → JSON', () => {
     assert.equal(detectDelimiter('abc'), ',');
   });
 
-  test('数字识别：整数、负数、浮点、科学计数；文本保持字符串', () => {
-    const values = JSON.parse(convert('csv-json', 'v\n-3\n2.5\n1e3\n0x1f\n中国').output).map((r) => r.v);
-    assert.deepEqual(values, [-3, 2.5, 1000, '0x1f', '中国']);
+  test('数字识别：整数、负数、浮点；往返不变的才转数字', () => {
+    // 1e3 / .5 / 2.0 这类「Number 转回字符串与原文不同」的写法保留原样，不改变用户输入
+    const values = JSON.parse(convert('csv-json', 'v\n-3\n2.5\n1e3\n.5\n2.0\n0x1f\n中国').output).map((r) => r.v);
+    assert.deepEqual(values, [-3, 2.5, '1e3', '.5', '2.0', '0x1f', '中国']);
+  });
+
+  test('自动识别不篡改超出安全整数范围的长数字（身份证号 / 雪花 ID）', () => {
+    const input = 'id,phone,zip\n110101199001011234,13800138000,007\n1234567890123456789,0123,00100';
+    const rows = JSON.parse(convert('csv-json', input).output);
+    assert.equal(rows[0].id, '110101199001011234');
+    assert.equal(rows[0].zip, '007');
+    assert.equal(rows[1].id, '1234567890123456789');
+    assert.equal(rows[1].phone, '0123');
+    assert.equal(rows[1].zip, '00100');
+    // 安全范围内的数字仍正常识别为数字
+    assert.equal(rows[0].phone, 13800138000);
+    const plain = JSON.parse(convert('csv-json', 'n\n42\n-7\n2.5\n0').output).map((r) => r.n);
+    assert.deepEqual(plain, [42, -7, 2.5, 0]);
+  });
+
+  test('引号未闭合资报引号开始的那一行（不是文件末尾）', () => {
+    const err = assertThrowsWith(() => convert('csv-json', 'a,b\n"1,2\n3,4\n5,6\n7,8'), '第 2 行', '引号未闭合');
+    assert.equal(err.line, 2);
+    // 中间行未闭合：定位到该行而不是最后一行
+    const err2 = assertThrowsWith(() => convert('csv-json', 'a,b\n1,2\n3,"x\n5,6'), '第 3 行', '引号未闭合');
+    assert.equal(err2.line, 3);
+  });
+
+  test('整行为空的行跳过（含结尾多余空行）', () => {
+    const rows = JSON.parse(convert('csv-json', 'a,b\n1,2\n\n3,4\n\n').output);
+    assert.deepEqual(rows, [
+      { a: 1, b: 2 },
+      { a: 3, b: 4 },
+    ]);
+  });
+
+  test('某行列数比表头多：给出提示，多出的列忽略', () => {
+    const r = convert('csv-json', 'a,b\n1,2\n3,4,5');
+    assert.match(r.notice, /1 行的列数比表头多，多出的列已忽略/);
+    assert.deepEqual(JSON.parse(r.output), [
+      { a: 1, b: 2 },
+      { a: 3, b: 4 },
+    ]);
+  });
+
+  test('__proto__ 作为表头时保留为自有属性（与 JSON.parse 一致）', () => {
+    const rows = JSON.parse(convert('csv-json', '__proto__,b\n1,2').output);
+    assert.deepEqual(rows, [JSON.parse('{"__proto__":1,"b":2}')]);
+    assert.deepEqual(Object.keys(rows[0]), ['__proto__', 'b']);
   });
 });
 

@@ -117,26 +117,35 @@ export function detectDelimiter(text) {
  * CSV 文本 → 对象数组。
  * @param {string} text
  * @param {CsvParseOptions} [options]
- * @returns {{ rows: object[], delimiter: string }} delimiter 为实际使用的分隔符字符
+ * @returns {{ rows: object[], delimiter: string, extraRows: number }}
+ *   delimiter 为实际使用的分隔符字符；extraRows 为列数多于表头的行数（这些行的多出列被忽略）
  */
 export function parseCsv(text, { delimiter = 'auto', autoDetect = true } = {}) {
   const src = text.replace(/^﻿/, ''); // 去掉 Excel 常见的 BOM
   const delim = delimiter === 'auto' ? detectDelimiter(src) : delimiterChar(delimiter);
   const rows = scanRows(src, delim);
-  if (rows.length === 0) return { rows: [], delimiter: delim };
+  if (rows.length === 0) return { rows: [], delimiter: delim, extraRows: 0 };
 
   const headers = dedupeHeaders(rows[0]);
   const out = [];
+  let extraRows = 0;
   for (let i = 1; i < rows.length; i += 1) {
     const row = rows[i];
+    if (row.length > headers.length) extraRows += 1;
     const obj = {};
     for (let c = 0; c < headers.length; c += 1) {
       const raw = c < row.length ? row[c] : '';
-      obj[headers[c]] = autoDetect ? typedValue(raw) : raw;
+      // defineProperty：让 __proto__ 这类键成为自有属性（与 JSON.parse 行为一致），不被悄悄丢掉
+      Object.defineProperty(obj, headers[c], {
+        value: autoDetect ? typedValue(raw) : raw,
+        enumerable: true,
+        writable: true,
+        configurable: true,
+      });
     }
     out.push(obj);
   }
-  return { rows: out, delimiter: delim };
+  return { rows: out, delimiter: delim, extraRows };
 }
 
 /** 逐字符扫描出二维字段数组（RFC 4180：引号内的分隔符 / 换行属于字段内容） */
@@ -146,6 +155,7 @@ function scanRows(src, delim) {
   let field = '';
   let inQuotes = false;
   let line = 1; // 当前物理行号（引号内换行也计入）
+  let quoteStartLine = 1; // 引号开始的那一行：报「引号未闭合」时定位用
   let i = 0;
   const endField = () => {
     row.push(field);
@@ -153,6 +163,11 @@ function scanRows(src, delim) {
   };
   const endRow = () => {
     endField();
+    if (row.length === 1 && row[0] === '') {
+      // 整行为空（含结尾多余的空行）：跳过，不生成全空字段的对象
+      row = [];
+      return;
+    }
     rows.push(row);
     row = [];
   };
@@ -188,6 +203,7 @@ function scanRows(src, delim) {
     }
     if (c === '"' && field === '') {
       inQuotes = true; // 引号只作为字段的开头才生效
+      quoteStartLine = line;
       i += 1;
       continue;
     }
@@ -212,7 +228,7 @@ function scanRows(src, delim) {
     i += 1;
   }
 
-  if (inQuotes) throw atPosition('引号未闭合（缺少结束引号）', line);
+  if (inQuotes) throw atPosition('引号未闭合（缺少结束引号）', quoteStartLine);
   if (field !== '' || row.length > 0) endRow(); // 结尾没有换行时的最后一个字段 / 行
   return rows;
 }
@@ -238,10 +254,19 @@ const INT_RE = /^-?\d+$/;
 const FLOAT_RE = /^[+-]?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?$/;
 const BOOL_RE = /^(true|false)$/i;
 
-/** 「自动识别数字和布尔」：空值保持空字符串，其余按内容识别 */
+/**
+ * 「自动识别数字和布尔」：空值保持空字符串，其余按内容识别。
+ * 数字只在「转回去一字不差」时才转（String(Number(raw)) === raw 且为有限数）：
+ * 超出安全整数范围的长数字（身份证号、雪花 ID）和带前导零的值（007、邮编、区号）
+ * 都保留为字符串，避免悄悄变成另一个数（与 PapaParse dynamicTyping 的保护一致）。
+ */
 function typedValue(raw) {
   if (raw === '') return '';
-  if (INT_RE.test(raw) || FLOAT_RE.test(raw)) return Number(raw);
+  if (INT_RE.test(raw) || FLOAT_RE.test(raw)) {
+    const n = Number(raw);
+    if (Number.isFinite(n) && String(n) === raw) return n;
+    return raw;
+  }
   if (BOOL_RE.test(raw)) return raw.toLowerCase() === 'true';
   return raw;
 }

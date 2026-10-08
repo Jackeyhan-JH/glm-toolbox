@@ -159,6 +159,11 @@ function splitIndent(text, lineNo) {
 
 const isSeqEntry = (bare) => bare === '-' || /^-\s/.test(bare);
 
+/** 建立自有属性：__proto__ 这类键不会变成原型设定而被丢掉，顺序与插入顺序一致 */
+function setOwn(obj, key, value) {
+  Object.defineProperty(obj, key, { value, enumerable: true, writable: true, configurable: true });
+}
+
 /** 该行是否是「键: 值」形式（先粗判，真正取键在 parseKey） */
 function isKeyLine(bare) {
   if (bare.startsWith('"') || bare.startsWith("'")) {
@@ -298,6 +303,7 @@ function parseSequence(cursor, seqIndent) {
 
 function parseMapping(cursor, mapIndent) {
   const result = {};
+  const seenKeys = new Set();
   for (;;) {
     const line = cursor.peekMeaningful();
     if (!line) break;
@@ -314,6 +320,10 @@ function parseMapping(cursor, mapIndent) {
     if (bare.startsWith('%')) throw atPosition('暂不支持 % 指令（如 %YAML）', line.no);
 
     const { key, rest } = parseKey(bare, line.no);
+    if (seenKeys.has(key)) {
+      throw atPosition(`重复的键「${key}」：YAML 要求同一层级的键唯一`, line.no);
+    }
+    seenKeys.add(key);
     const cleanRest = rest.replace(/^[ \t]+/, '');
     cursor.advance(); // 键值行已分析完，接下来消费它的值
 
@@ -321,7 +331,7 @@ function parseMapping(cursor, mapIndent) {
       // 值在后续行：更深的任意节点；或与本键同级的序列（tags:\n- a 也是合法 YAML）
       const child = parseNodeAt(cursor, mapIndent + 1);
       if (child) {
-        result[key] = child.value;
+        setOwn(result, key, child.value);
         continue;
       }
       const nxt = cursor.peekMeaningful();
@@ -329,20 +339,20 @@ function parseMapping(cursor, mapIndent) {
         const peek = splitIndent(nxt.text, nxt.no);
         const peekBare = stripTrailingComment(peek.text);
         if (peek.indent === mapIndent && isSeqEntry(peekBare)) {
-          result[key] = parseSequence(cursor, mapIndent).value;
+          setOwn(result, key, parseSequence(cursor, mapIndent).value);
           continue;
         }
       }
-      result[key] = null;
+      setOwn(result, key, null);
       continue;
     }
 
     const first = cleanRest[0];
     if (first === '|' || first === '>') {
-      result[key] = parseBlockScalar(cursor, mapIndent, stripTrailingComment(cleanRest), line.no);
+      setOwn(result, key, parseBlockScalar(cursor, mapIndent, stripTrailingComment(cleanRest), line.no));
       continue;
     }
-    result[key] = parseInlineValue(cursor, cleanRest, line.no);
+    setOwn(result, key, parseInlineValue(cursor, cleanRest, line.no));
   }
   return { value: result };
 }
@@ -514,6 +524,7 @@ function parseFlowValue(s, i, lineNo) {
   if (c === '{') {
     i = skipWs(i + 1);
     const obj = {};
+    const seenKeys = new Set();
     if (s[i] === '}') return [obj, i + 1];
     for (;;) {
       let key;
@@ -530,6 +541,10 @@ function parseFlowValue(s, i, lineNo) {
         key = resolved === null ? 'null' : String(resolved);
         i = skipWs(j);
       }
+      if (seenKeys.has(key)) {
+        throw atPosition(`流式映射里重复的键「${key}」：YAML 要求同一层级的键唯一`, lineNo);
+      }
+      seenKeys.add(key);
       let value = null;
       if (s[i] === ':') {
         i = skipWs(i + 1);
@@ -539,7 +554,7 @@ function parseFlowValue(s, i, lineNo) {
           i = skipWs(ni);
         }
       }
-      obj[key] = value;
+      setOwn(obj, key, value);
       if (s[i] === ',') {
         i = skipWs(i + 1);
         if (s[i] === '}') return [obj, i + 1]; // 允许尾逗号
@@ -654,9 +669,15 @@ export function parseYaml(text) {
 
   const { segments } = splitDocuments(rawLines);
   const docs = [];
-  for (const seg of segments) {
+  for (let i = 0; i < segments.length; i += 1) {
+    const seg = segments[i];
     const meaningful = seg.lines.filter((l) => isMeaningfulLine(l.text));
-    if (meaningful.length === 0) continue;
+    if (meaningful.length === 0) {
+      // 空段：首个 --- 之前、以及 ... 之后（文档未开始）的不算文档；
+      // --- 之后的空文档保留为 null（如「---\n---\na: 1」→ [null, {a:1}]）。
+      if (i > 0 && !seg.startsAfterEnd) docs.push(null);
+      continue;
+    }
     if (seg.startsAfterEnd) {
       throw atPosition('文档结束标记「...」之后不应再有内容（新文档请用「---」开始）', meaningful[0].no);
     }
@@ -678,11 +699,25 @@ export function parseYaml(text) {
 
 const ALWAYS_UNSAFE_FIRST = '#,[]{}&*!|>\'"%@`';
 
+/**
+ * 会被 YAML 1.1 解析器（PyYAML、Ansible、Ruby、不少 K8s / CI 工具）读成
+ * 布尔 / 日期 / 六十进制数字的普通写法。本工具解析方向按 YAML 1.2 保持不变，
+ * 但序列化时要加引号，免得生成的配置拿去别处用被误读（如「挪威问题」的 no → false）。
+ */
+const YAML11_BOOL_RE = /^(?:y|Y|yes|Yes|YES|n|N|no|No|NO|on|On|ON|off|Off|OFF)$/;
+const YAML11_TIMESTAMP_RE = /^\d{4}-\d{2}-\d{2}/;
+const YAML11_SEXAGESIMAL_RE = /^\d+(?::[0-5]?\d)+$/;
+const YAML11_UNDERSCORE_NUM_RE = /^[-+]?\d[\d_]*$/;
+
 /** 字符串是否必须加引号（会被误读为其他类型，或普通写法在语法上不安全） */
 export function plainNeedsQuote(s) {
   if (s === '') return true;
   if (typeof resolvePlain(s) !== 'string') return true; // 会被识别成 null / 布尔 / 数字
   if (/[\n\r\t\u0000-\u001f\u007f]/.test(s)) return true; // 控制字符：需要双引号转义
+  if (YAML11_BOOL_RE.test(s)) return true; // 会被 YAML 1.1 读成布尔
+  if (YAML11_TIMESTAMP_RE.test(s)) return true; // 会被 YAML 1.1 读成日期
+  if (YAML11_SEXAGESIMAL_RE.test(s)) return true; // 会被 YAML 1.1 读成六十进制数字
+  if (YAML11_UNDERSCORE_NUM_RE.test(s)) return true; // 会被 YAML 1.1 读成带下划线数字
   if (ALWAYS_UNSAFE_FIRST.includes(s[0])) return true;
   if (/^[-?:]( |$)/.test(s)) return true;
   if (s.startsWith(' ') || s.endsWith(' ')) return true;

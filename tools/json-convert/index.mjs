@@ -82,6 +82,7 @@ export async function mount(root, ctx) {
     'aria-label': '输出',
     readonly: '',
     spellcheck: 'false',
+    wrap: 'off', // 大输出不软换行：浏览器排版耗时约减半，结果按原始行宽横向滚动
     placeholder: '转换结果会显示在这里',
   });
 

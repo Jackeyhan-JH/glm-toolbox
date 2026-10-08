@@ -75,4 +75,6 @@
 
 #json-convert-output {
   background: var(--bg-inset);
+  white-space: pre; /* 配合 wrap="off"：不做软换行，降低超大结果的排版耗时 */
+  overflow-x: auto;
 }

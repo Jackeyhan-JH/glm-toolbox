@@ -70,7 +70,8 @@ test.describe('JSON 转换', () => {
   test('JSON → YAML：字符串保型加引号', async ({ page }) => {
     await openTool(page, 'json-convert');
     await page.locator(INPUT).fill('{"v":"123","b":"true","n":"null"}');
-    await expect(page.locator(OUTPUT)).toHaveValue("v: '123'\nb: 'true'\nn: 'null'\n");
+    // 三个值都带引号；键 n 也会被 YAML 1.1 解析器读成布尔，同样加引号
+    await expect(page.locator(OUTPUT)).toHaveValue("v: '123'\nb: 'true'\n'n': 'null'\n");
   });
 
   test('YAML → JSON：验收例与多文档提示', async ({ page }) => {

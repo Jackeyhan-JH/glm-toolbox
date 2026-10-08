@@ -129,7 +129,10 @@ class JsonParser {
       }
       const key = this.parseString();
       this.expect(':', '键后必须有冒号');
-      result[key] = this.parseValue(depth + 1); // 重复键后者覆盖，与 JSON.parse 一致
+      const value = this.parseValue(depth + 1);
+      // defineProperty：__proto__ 等键作为自有属性保留（与 JSON.parse 一致）；
+      // 重复键后者覆盖（configurable 允许重定义），同样与 JSON.parse 一致
+      Object.defineProperty(result, key, { value, enumerable: true, writable: true, configurable: true });
       const t = this.next();
       if (t === ',') {
         this.pos += 1;
