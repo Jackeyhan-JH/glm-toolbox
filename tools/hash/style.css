@@ -1,0 +1,201 @@
+/* 哈希计算工具私有样式（经 ctx.loadStyle 加载，切换工具时自动移除）。
+   通用样式（按钮 / 输出框 / 两栏布局 / seg 等）见 assets/css/base.css，
+   颜色一律使用 assets/css/theme.css 的变量，深浅主题均可用。 */
+
+/* base.css 的 .btn / .form-row 设置了 display，会盖掉 [hidden] 的 UA 样式，这里统一恢复 */
+.hash [hidden] {
+  display: none !important;
+}
+
+.hash .tool-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 14px;
+  margin-bottom: 14px;
+}
+
+.hash .tool-title {
+  font-size: 20px;
+}
+
+.hash .tool-desc {
+  color: var(--fg-muted);
+  flex: 1 1 240px;
+}
+
+/* ---------- 选项行 ---------- */
+
+.hash-options {
+  align-items: center;
+}
+
+.hash-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--fg-2);
+  font-size: 14px;
+}
+
+.hash-option-sep {
+  color: var(--fg-muted);
+  font-size: 13px;
+  padding-left: 10px;
+}
+
+.hash-key-row {
+  margin-bottom: 10px;
+}
+
+.hash-key-input {
+  width: 260px;
+  max-width: 100%;
+  font-family: var(--font-mono);
+}
+
+.hash-key-row select {
+  font-size: 13px;
+}
+
+/* ---------- 面板 ---------- */
+
+.hash-panel textarea {
+  min-height: 220px;
+}
+
+.hash-dropzone {
+  display: block;
+  border: 2px dashed var(--border-strong);
+  border-radius: var(--radius-m);
+  background: var(--bg-inset);
+  padding: 22px 14px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.hash-dropzone:hover,
+.hash-dropzone.is-over {
+  border-color: var(--accent);
+  background: var(--accent-weak);
+}
+
+.hash-dropzone-title {
+  color: var(--fg-2);
+  margin-bottom: 4px;
+}
+
+/* 隐藏原生文件输入，交互走拖拽 / 点击 */
+.hash-dropzone input[type='file'] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* ---------- 进度 ---------- */
+
+.hash-progress {
+  margin-top: 12px;
+}
+
+.hash-progress-track {
+  height: 8px;
+  background: var(--bg-inset);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.hash-progress-bar {
+  height: 100%;
+  width: 0%;
+  background: var(--accent);
+  border-radius: 999px;
+  transition: width 0.15s ease;
+}
+
+.hash .tool-actions {
+  margin-top: 8px;
+}
+
+/* ---------- 结果行 ---------- */
+
+.hash-rows {
+  margin-bottom: 6px;
+}
+
+.hash-rows-hmac {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border-strong);
+}
+
+.hash-row {
+  margin-bottom: 10px;
+}
+
+.hash-row-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 3px;
+}
+
+.hash-row-label {
+  font-weight: 500;
+  color: var(--fg-2);
+  font-size: 13px;
+}
+
+.hash-row-actions {
+  margin-left: auto;
+}
+
+.hash-value {
+  min-height: 0;
+  padding: 6px 10px;
+  font-size: 12.5px;
+}
+
+.hash-mark {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--fg-muted);
+}
+
+.hash-mark.is-ok {
+  color: var(--ok);
+}
+
+/* ---------- 比对 ---------- */
+
+.hash-compare {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.hash-compare-input {
+  width: 100%;
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+.hash-compare-status {
+  margin-top: 6px;
+  font-size: 13px;
+}
+
+.hash-compare-status.is-ok {
+  color: var(--ok);
+}
+
+.hash-compare-status.is-bad {
+  color: var(--danger);
+}
