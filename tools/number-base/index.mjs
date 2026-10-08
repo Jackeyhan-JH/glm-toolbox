@@ -272,7 +272,7 @@ export async function mount(root, ctx) {
     spellcheck: 'false',
     autocomplete: 'off',
   });
-  opAInput.addEventListener('input', bitwiseDebounced);
+  opAInput.addEventListener('input', onBitwiseInput);
 
   const opSelect = el(
     'select',
@@ -290,7 +290,7 @@ export async function mount(root, ctx) {
     spellcheck: 'false',
     autocomplete: 'off',
   });
-  opBInput.addEventListener('input', bitwiseDebounced);
+  opBInput.addEventListener('input', onBitwiseInput);
 
   bitwiseSection.append(
     el('h2', { class: 'nb-section-title' }, '位运算'),
@@ -404,7 +404,7 @@ export async function mount(root, ctx) {
         caseSeg,
         el('label', { class: 'nb-check', for: groupCheckbox.id }, groupCheckbox, ' 分组显示'),
       ),
-      el('h2', { class: 'nb-section-title' }, '进制转换'),
+      el('h2', { class: 'nb-section-title' }, '进制互转'),
       convertSection,
       compSection,
       bitwiseSection,
@@ -620,12 +620,15 @@ export async function mount(root, ctx) {
     valueInputs.dec.focus();
   }
 
-  const convertDebounced = debounce(runConvert, DEBOUNCE_MS);
-  const bitwiseDebounced = debounce(() => {
+  /** 操作数输入：立即持久化原始文本（防抖只作用于重算渲染，快速离开也不丢输入） */
+  function onBitwiseInput() {
     ctx.storage.set(STORAGE_KEYS.opA, opAInput.value);
     ctx.storage.set(STORAGE_KEYS.opB, opBInput.value);
-    renderBitwise();
-  }, DEBOUNCE_MS);
+    bitwiseDebounced();
+  }
+
+  const convertDebounced = debounce(runConvert, DEBOUNCE_MS);
+  const bitwiseDebounced = debounce(renderBitwise, DEBOUNCE_MS);
 
   /* ---------- 恢复上次输入并首次渲染 ---------- */
 

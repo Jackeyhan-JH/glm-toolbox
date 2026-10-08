@@ -95,7 +95,7 @@ test.describe('进制转换：互转', () => {
 
     await field(page, DEC).fill('0o777');
     await expect(field(page, BIN)).toHaveValue('1 1111 1111');
-    await expect(field(page, HEX)).toHaveValue('1FF');
+    await expect(field(page, HEX)).toHaveValue('1 FF');
 
     await field(page, DEC).fill('1,000,000');
     await expect(field(page, HEX)).toHaveValue('F 42 40');
@@ -108,7 +108,8 @@ test.describe('进制转换：互转', () => {
 
     await field(page, DEC).fill('12345678901234567890');
     await expect(field(page, HEX)).toHaveValue('AB54A98CEB1F0AD2');
-    await expect(field(page, BIN)).toHaveValue('1010 1011 0101 0100 1010 1001 1000 1100 1110 1011 0001 1111 0000 1010 1101 0010');
+    // 该用例已关闭分组，二进制为不加空格的原串
+    await expect(field(page, BIN)).toHaveValue('1010101101010100101010011000110011101011000111110000101011010010');
 
     await field(page, DEC).fill('-255');
     await expect(field(page, HEX)).toHaveValue('-FF');
@@ -187,7 +188,7 @@ test.describe('进制转换：互转', () => {
 test.describe('进制转换：补码视图', () => {
   test('8 位下 -1 → 11111111（无符号 255、有符号 -1）', async ({ page }) => {
     await openTool(page, 'number-base');
-    await page.getByRole('button', { name: '8 位' }).click();
+    await page.getByTestId('number-base-width-8').click();
     await field(page, DEC).fill('-1');
     await expect(page.getByTestId('number-base-comp-bits')).toHaveText('1111 1111');
     await expect(page.getByTestId('number-base-comp-unsigned')).toHaveText('255');
@@ -198,7 +199,7 @@ test.describe('进制转换：补码视图', () => {
 
   test('8 位下 -128 → 10000000', async ({ page }) => {
     await openTool(page, 'number-base');
-    await page.getByRole('button', { name: '8 位' }).click();
+    await page.getByTestId('number-base-width-8').click();
     await field(page, DEC).fill('-128');
     await expect(page.getByTestId('number-base-comp-bits')).toHaveText('1000 0000');
     await expect(page.getByTestId('number-base-comp-unsigned')).toHaveText('128');
@@ -207,7 +208,7 @@ test.describe('进制转换：补码视图', () => {
 
   test('8 位下 128 → 提示超出有符号范围，无符号为 128', async ({ page }) => {
     await openTool(page, 'number-base');
-    await page.getByRole('button', { name: '8 位' }).click();
+    await page.getByTestId('number-base-width-8').click();
     await field(page, DEC).fill('128');
     await expect(page.getByTestId('number-base-comp-warn')).toBeVisible();
     await expect(page.getByTestId('number-base-comp-warn')).toHaveText(
@@ -219,7 +220,7 @@ test.describe('进制转换：补码视图', () => {
 
   test('8 位下 256 → 提示超出 8 位范围，截断为 0', async ({ page }) => {
     await openTool(page, 'number-base');
-    await page.getByRole('button', { name: '8 位' }).click();
+    await page.getByTestId('number-base-width-8').click();
     await field(page, DEC).fill('256');
     await expect(page.getByTestId('number-base-comp-warn')).toBeVisible();
     await expect(page.getByTestId('number-base-comp-warn')).toHaveText('超出 8 位范围，截断为 0');
@@ -253,7 +254,7 @@ test.describe('进制转换：位运算', () => {
 
   test('8 位：NOT 0x0F → 0xF0（无符号 240，有符号 -16），操作数 B 禁用', async ({ page }) => {
     await openTool(page, 'number-base');
-    await page.getByRole('button', { name: '8 位' }).click();
+    await page.getByTestId('number-base-width-8').click();
     await page.getByLabel('运算').selectOption('NOT');
     await expect(field(page, '操作数 B')).toBeDisabled();
     await field(page, '操作数 A').fill('0x0F');
@@ -287,7 +288,7 @@ test.describe('进制转换：位运算', () => {
 
   test('64 位：1 << 63 → 无符号 9223372036854775808', async ({ page }) => {
     await openTool(page, 'number-base');
-    await page.getByRole('button', { name: '64 位' }).click();
+    await page.getByTestId('number-base-width-64').click();
     await expect(page.locator('.nb-bit')).toHaveCount(64);
     await field(page, '操作数 A').fill('1');
     await page.getByLabel('运算').selectOption('SHL');
@@ -323,7 +324,7 @@ test.describe('进制转换：位运算', () => {
 
   test('操作数超出位宽：按补码截断并提示（8 位下 256 AND 1 = 0）', async ({ page }) => {
     await openTool(page, 'number-base');
-    await page.getByRole('button', { name: '8 位' }).click();
+    await page.getByTestId('number-base-width-8').click();
     await field(page, '操作数 A').fill('256');
     await page.getByLabel('运算').selectOption('AND');
     await field(page, '操作数 B').fill('1');
@@ -389,21 +390,24 @@ test.describe('进制转换：位网格', () => {
 test.describe('进制转换：持久化、主题与移动端', () => {
   test('刷新后恢复选项与输入（ctx.storage）', async ({ page }) => {
     await openTool(page, 'number-base');
-    await page.getByRole('button', { name: '8 位' }).click();
+    await page.getByTestId('number-base-width-8').click();
     await page.getByRole('button', { name: '小写' }).click();
     await page.getByLabel('分组显示').uncheck();
-    await field(page, DEC).fill('-1');
+    await field(page, DEC).fill('-255');
+    // 等转换防抖落地（意味着输入已写入 storage，刷新才能恢复）
+    await expect(field(page, HEX)).toHaveValue('-ff');
     await field(page, '操作数 A').fill('0x0F');
     await page.getByLabel('运算').selectOption('NOT');
     await expect(page.getByTestId('number-base-result-unsigned')).toHaveText('240');
 
     await page.reload();
     await expect(page.locator('[data-tool-ready="number-base"]')).toBeAttached();
-    await expect(field(page, DEC)).toHaveValue('-1');
+    await expect(field(page, DEC)).toHaveValue('-255');
     await expect(field(page, HEX)).toHaveValue('-ff');
-    await expect(page.getByTestId('number-base-comp-bits')).toHaveText('11111111');
+    // -255 在 8 位下的补码是 00000001（-256 + 1）
+    await expect(page.getByTestId('number-base-comp-bits')).toHaveText('00000001');
     await expect(page.locator('.nb-bit')).toHaveCount(8);
-    await expect(page.getByRole('button', { name: '8 位' })).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.getByTestId('number-base-width-8')).toHaveAttribute('aria-pressed', 'true');
     await expect(field(page, '操作数 A')).toHaveValue('0x0F');
     await expect(page.getByLabel('运算')).toHaveValue('NOT');
     await expect(page.getByTestId('number-base-result-unsigned')).toHaveText('240');
@@ -452,7 +456,7 @@ test.describe('进制转换：持久化、主题与移动端', () => {
       await field(page, DEC).fill('255');
       await expect(field(page, BIN)).toHaveValue('1111 1111');
 
-      await page.getByRole('button', { name: '64 位' }).click();
+      await page.getByTestId('number-base-width-64').click();
       await field(page, '操作数 A').fill('1');
       await page.getByLabel('运算').selectOption('SHL');
       await field(page, '移位量').fill('63');
