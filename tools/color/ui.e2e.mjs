@@ -81,6 +81,12 @@ test.describe('颜色工具：格式转换', () => {
     await page.locator(INPUT).fill('rgba(255,0,0,.5)');
     await expectFormat(page, 'hex', '#ff000080');
     await expectFormat(page, 'rgb', 'rgba(255, 0, 0, 0.5)');
+
+    // 逗号语法省略 alpha：默认不透明，命名颜色标「精确」
+    await page.locator(INPUT).fill('rgb(255, 0, 0)');
+    await expectFormat(page, 'hex', '#ff0000');
+    await expectFormat(page, 'named', 'red');
+    await expect(page.getByTestId('color-named-exact')).toBeVisible();
   });
 
   test('hsl(120, 100%, 25%) → #008000（green 精确）；rebeccapurple → #663399；RED → #ff0000', async ({ page }) => {

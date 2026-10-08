@@ -407,14 +407,15 @@ function percentValue(token, notes) {
 function parseRgb(body) {
   const notes = [];
   if (body.includes(',')) {
-    // 旧语法：逗号分隔，恰好 3 个通道 + 可选 alpha
+    // 旧语法：逗号分隔，恰好 3 个通道 + 可选 alpha（缺省为不透明 1）
     const parts = body.split(',').map((s) => s.trim());
     if (parts.length !== 3 && parts.length !== 4) return invalid();
     const values = parts.map((part, i) =>
       i === 3 ? alphaValue(part, notes) : channelValue(part, notes),
     );
     if (values.some((v) => v === null)) return invalid();
-    return makeColor(values[0], values[1], values[2], values[3], notes);
+    const a = parts.length === 4 ? values[3] : 1;
+    return makeColor(values[0], values[1], values[2], a, notes);
   }
   // 现代语法：空格分隔 3 个通道，alpha 必须以 / 分隔
   const pieces = body.split('/');

@@ -103,6 +103,26 @@ test('rgb() 逗号 / 空格、百分比、透明度百分比与数字', () => {
   assert.equal(fmt('rgb(0 0 0 / 50%)').hex, '#00000080');
 });
 
+test('逗号语法省略 alpha 默认不透明：rgb(255, 0, 0) → red 精确、a === 1', () => {
+  for (const input of ['rgb(255, 0, 0)', 'rgba(255, 0, 0)']) {
+    const d = describeColor(input);
+    assert.equal(d.formats.hex, '#ff0000', input);
+    assert.equal(d.color.a, 1, input); // 内部颜色必须是合法的 { a: 1 }
+    assert.equal(d.named.name, 'red', input);
+    assert.equal(d.named.exact, true, input);
+  }
+  const green = describeColor('rgb(0, 128, 0)');
+  assert.equal(green.formats.hex, '#008000');
+  assert.equal(green.color.a, 1);
+  assert.equal(green.named.name, 'green');
+  assert.equal(green.named.exact, true);
+
+  // hsl() 逗号语法同样缺省不透明
+  const hsl = describeColor('hsl(120, 100%, 25%)');
+  assert.equal(hsl.color.a, 1);
+  assert.equal(hsl.named.exact, true);
+});
+
 test('hsl() 角度单位（deg / grad / rad / turn）与折算', () => {
   assert.equal(fmt('hsl(120deg, 100%, 25%)').hex, '#008000');
   assert.equal(fmt('hsl(480, 100%, 25%)').hex, '#008000'); // 480 = 120 + 360
