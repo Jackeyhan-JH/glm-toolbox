@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    name: 检查与测试
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: 安装依赖
+        run: npm ci
+
+      - name: 清单与约定检查
+        run: npm run check
+
+      - name: 单元测试
+        run: npm test
+
+      - name: 安装 Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: 端到端测试
+        run: npm run e2e
+
+      - name: 上传 Playwright 报告
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+          if-no-files-found: ignore
