@@ -1,0 +1,8 @@
+{
+  "id": "regex",
+  "name": "正则测试",
+  "description": "实时测试正则表达式，查看分组并预览替换",
+  "category": "text",
+  "keywords": ["regex", "regexp", "正则", "表达式", "匹配", "替换", "zhengze", "pattern", "正则表达式", "速查"],
+  "order": 10
+}
