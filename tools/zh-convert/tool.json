@@ -1,0 +1,8 @@
+{
+  "id": "zh-convert",
+  "name": "简繁转换",
+  "description": "中文简体与繁体互相转换，支持常见词组",
+  "category": "text",
+  "keywords": ["简体", "繁体", "简繁", "繁简", "chinese", "jianfan", "简繁转换", "s2t", "t2s", "汉字"],
+  "order": 40
+}
