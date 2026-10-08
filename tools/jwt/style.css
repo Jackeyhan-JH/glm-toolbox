@@ -1,0 +1,312 @@
+/* JWT 解析工具私有样式（经 ctx.loadStyle 加载，切换工具时自动移除）。
+   通用样式（按钮 / 输出框 / 表单行等）见 assets/css/base.css，
+   颜色一律使用 assets/css/theme.css 的变量，深浅主题均可用。
+   三段着色约定：头部 = danger、载荷 = accent、签名 = ok。 */
+
+.jwt .tool-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 14px;
+  margin-bottom: 14px;
+}
+
+.jwt .tool-title {
+  font-size: 20px;
+}
+
+.jwt .tool-desc {
+  color: var(--fg-muted);
+  flex: 1 1 240px;
+}
+
+/* ---------- 输入区 ---------- */
+
+.jwt-input-area {
+  margin-bottom: 14px;
+}
+
+.jwt-input-area textarea {
+  min-height: 96px;
+}
+
+/* ---------- 状态徽标 ---------- */
+
+.jwt-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin-bottom: 10px;
+}
+
+.jwt-badge {
+  display: inline-block;
+  padding: 2px 12px;
+  border-radius: 999px;
+  border: 1px solid;
+  font-weight: 600;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.jwt-badge.is-valid {
+  color: var(--ok);
+  border-color: var(--ok);
+  background: var(--ok-bg);
+}
+
+.jwt-badge.is-expired {
+  color: var(--danger);
+  border-color: var(--danger);
+  background: var(--danger-bg);
+}
+
+.jwt-badge.is-not-yet-valid {
+  color: var(--warn);
+  border-color: var(--warn);
+  background: var(--warn-bg);
+}
+
+.jwt-status-detail {
+  color: var(--fg-2);
+}
+
+.jwt-status .btn {
+  margin-left: auto;
+}
+
+/* ---------- 提示框（安全警告等）与验签结果 ---------- */
+
+.jwt-note,
+.jwt-verify-result {
+  display: block;
+  margin: 8px 0;
+  padding: 8px 12px;
+  border-left: 3px solid;
+  border-radius: var(--radius-s);
+  overflow-wrap: anywhere;
+}
+
+.jwt-note.is-warn,
+.jwt-verify-result.is-warn {
+  color: var(--warn);
+  border-color: var(--warn);
+  background: var(--warn-bg);
+}
+
+.jwt-verify-result.is-ok {
+  color: var(--ok);
+  border-color: var(--ok);
+  background: var(--ok-bg);
+  font-weight: 500;
+}
+
+.jwt-verify-result.is-bad {
+  color: var(--danger);
+  border-color: var(--danger);
+  background: var(--danger-bg);
+  font-weight: 500;
+}
+
+.jwt-verify-result.is-hint {
+  color: var(--fg-muted);
+  border-color: var(--border-strong);
+  background: var(--bg-inset);
+}
+
+/* ---------- token 三段着色 ---------- */
+
+.jwt-parts {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 2;
+  overflow-wrap: anywhere;
+  margin-bottom: 6px;
+}
+
+.jwt-part {
+  display: inline;
+  padding: 2px 4px;
+  border-radius: var(--radius-s);
+}
+
+.jwt-part.is-header {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+.jwt-part.is-payload {
+  background: var(--accent-weak);
+  color: var(--accent);
+}
+
+.jwt-part.is-signature {
+  background: var(--ok-bg);
+  color: var(--ok);
+}
+
+.jwt-part-tag {
+  font-style: normal;
+  font-size: 11px;
+  font-family: system-ui, sans-serif;
+  opacity: 0.75;
+  margin-right: 4px;
+}
+
+.jwt-parts-dot {
+  color: var(--fg-muted);
+  padding: 0 1px;
+}
+
+/* ---------- 头部 / 载荷 / 签名三栏 ---------- */
+
+.jwt-panes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 12px;
+  align-items: start;
+  margin-top: 10px;
+}
+
+.jwt-pane-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.jwt-pane-head h3 {
+  font-size: 13px;
+  margin: 0;
+}
+
+.jwt-pane-head .tool-actions {
+  margin: 0 0 0 auto;
+}
+
+.jwt-pane-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex: none;
+}
+
+.jwt-pane-dot.is-header {
+  background: var(--danger);
+}
+
+.jwt-pane-dot.is-payload {
+  background: var(--accent);
+}
+
+.jwt-pane-dot.is-signature {
+  background: var(--ok);
+}
+
+.jwt-pane .output-box {
+  min-height: 64px;
+  max-height: 320px;
+}
+
+.jwt-pane .output-box + .output-box {
+  margin-top: 8px;
+}
+
+/* ---------- 声明表格 ---------- */
+
+.jwt-claims-block {
+  margin-top: 18px;
+}
+
+.jwt-table-scroll {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-m);
+  max-width: 100%;
+}
+
+.jwt-claims {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.jwt-claims th,
+.jwt-claims td {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.jwt-claims thead th {
+  color: var(--fg-muted);
+  font-weight: 500;
+  font-size: 12px;
+  background: var(--bg-inset);
+  white-space: nowrap;
+}
+
+.jwt-claims tbody tr:last-child th,
+.jwt-claims tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.jwt-claims tbody th {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.jwt-claim-value {
+  font-family: var(--font-mono);
+  overflow-wrap: anywhere;
+}
+
+.jwt-claim-time {
+  margin-top: 4px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--fg-2);
+}
+
+.jwt-claim-rel {
+  color: var(--fg-muted);
+}
+
+.jwt-claim-desc {
+  color: var(--fg-2);
+  min-width: 140px;
+}
+
+/* ---------- 验签区 ---------- */
+
+.jwt-verify {
+  margin-top: 22px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.jwt-verify h2 {
+  font-size: 15px;
+  margin-bottom: 10px;
+}
+
+.jwt-verify .field-label {
+  margin-bottom: 0;
+}
+
+.jwt-verify #jwt-key-input {
+  flex: 1 1 200px;
+  min-width: 0;
+}
+
+.jwt-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--fg-2);
+  font-size: 14px;
+  white-space: nowrap;
+}
