@@ -1,0 +1,8 @@
+{
+  "id": "case-convert",
+  "name": "命名风格转换",
+  "description": "驼峰、下划线、短横线等命名风格与大小写、全半角转换",
+  "category": "text",
+  "keywords": ["case", "camelcase", "snake_case", "驼峰", "下划线", "大小写", "全角", "tuofeng", "kebab", "pascalcase", "命名", "转换", "半角", "quanjiao"],
+  "order": 30
+}

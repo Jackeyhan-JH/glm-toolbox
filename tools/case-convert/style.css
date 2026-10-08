@@ -1,0 +1,122 @@
+/* 命名风格转换私有样式（经 ctx.loadStyle 加载，切换工具时自动移除）。
+   通用样式（按钮 / 表单 / 输出框）见 assets/css/base.css；
+   颜色一律引用 assets/css/theme.css 的变量，深浅主题都可用。 */
+
+.case-convert .tool-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 14px;
+  margin-bottom: 14px;
+}
+
+.case-convert .tool-title {
+  font-size: 20px;
+}
+
+.case-convert .tool-desc {
+  color: var(--fg-muted);
+  flex: 1 1 240px;
+}
+
+.case-convert .tool-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* ---------- 输入区 ---------- */
+
+.case-convert textarea {
+  width: 100%;
+  min-height: 130px;
+  resize: vertical;
+}
+
+.case-tokens-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin: 8px 0 0;
+  color: var(--fg-muted);
+}
+
+.case-tokens-value {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--fg-2);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+
+/* ---------- 结果区 ---------- */
+
+.case-results {
+  margin-top: 18px;
+}
+
+.case-results-title {
+  font-size: 15px;
+  margin: 0 0 4px;
+}
+
+.case-row {
+  display: grid;
+  grid-template-columns: minmax(11em, auto) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 4px 12px;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-m);
+  background: var(--bg-raise);
+  margin-bottom: 6px;
+}
+
+.case-name {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--fg-muted);
+  user-select: none;
+  white-space: nowrap;
+}
+
+.case-value {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--fg);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+
+.case-value.is-empty {
+  color: var(--fg-muted);
+}
+
+.case-value.is-empty::after {
+  content: '（空）';
+  font-size: 12px;
+}
+
+/* ---------- 窄屏 ---------- */
+
+@media (max-width: 720px) {
+  .case-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'name copy'
+      'value value';
+  }
+
+  .case-row .case-name {
+    grid-area: name;
+  }
+
+  .case-row .case-value {
+    grid-area: value;
+  }
+
+  .case-row .copy-btn {
+    grid-area: copy;
+  }
+}
