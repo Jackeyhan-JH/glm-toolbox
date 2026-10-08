@@ -1,0 +1,260 @@
+/* 随机生成器私有样式（经 ctx.loadStyle 加载，切换工具时自动移除）。
+   通用样式（按钮 / 表单 / 输出框 / 两栏布局等）见 assets/css/base.css，
+   颜色一律引用 assets/css/theme.css 的变量。 */
+
+/* hidden 属性必须压过下面设置过的 display */
+.random [hidden] {
+  display: none !important;
+}
+
+.random .tool-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 14px;
+  margin-bottom: 14px;
+}
+
+.random .tool-title {
+  font-size: 20px;
+}
+
+.random .tool-desc {
+  color: var(--fg-muted);
+  flex: 1 1 240px;
+}
+
+/* ---------- 标签页 ---------- */
+
+.random-tabs {
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+/* ---------- 工具栏（数量 / 重新生成 / 复制 / 下载） ---------- */
+
+.random-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 12px;
+  margin-bottom: 14px;
+}
+
+.random-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--fg-2);
+  font-weight: 500;
+}
+
+.random-inline input[type='number'] {
+  width: 88px;
+}
+
+.random-spacer {
+  flex: 1 1 auto;
+}
+
+/* ---------- 设置面板 ---------- */
+
+.random-panel {
+  margin-bottom: 14px;
+}
+
+.random-panel .field-label {
+  display: block;
+  margin: 12px 0 6px;
+}
+
+.random-panel .field-label:first-child {
+  margin-top: 0;
+}
+
+.random-checks {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 8px 14px;
+  margin-bottom: 4px;
+}
+
+.random-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--fg-2);
+  cursor: pointer;
+}
+
+.random-check input {
+  accent-color: var(--accent);
+  margin: 0;
+}
+
+.random-panel select,
+.random-panel input[type='number'],
+.random-panel input[type='text'] {
+  width: 100%;
+}
+
+.random-panel input[type='number'] {
+  max-width: 180px;
+}
+
+.random-length-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.random-length-row .field-label {
+  margin: 0;
+}
+
+.random-length-row input[type='number'] {
+  width: 88px;
+}
+
+.random-panel input[type='range'] {
+  width: 100%;
+  margin: 10px 0 4px;
+  accent-color: var(--accent);
+}
+
+.random-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  color: var(--fg-2);
+  background: var(--bg-inset);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-s);
+  padding: 8px 10px;
+}
+
+.random-meta b {
+  font-family: var(--font-mono);
+  color: var(--fg);
+}
+
+.random-meta span[data-testid='random-pw-pool'] {
+  font-family: var(--font-mono);
+}
+
+/* 强度徽标（颜色只引用主题变量） */
+.strength-badge {
+  display: inline-block;
+  min-width: 40px;
+  text-align: center;
+  font-weight: 600;
+  padding: 1px 10px;
+  border-radius: var(--radius-s);
+  border: 1px solid var(--border);
+  color: var(--fg-2);
+}
+
+.strength-badge.is-weak {
+  color: var(--danger);
+  border-color: var(--danger);
+  background: var(--danger-bg);
+}
+
+.strength-badge.is-fair {
+  color: var(--warn);
+  border-color: var(--warn);
+  background: var(--warn-bg);
+}
+
+.strength-badge.is-strong {
+  color: var(--ok);
+  border-color: var(--ok);
+  background: var(--ok-bg);
+}
+
+.strength-badge.is-very-strong {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-weak);
+}
+
+.random-privacy {
+  margin-top: 4px;
+}
+
+/* ---------- 结果区 ---------- */
+
+.random-result-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.random-result-head .field-label {
+  margin: 0;
+}
+
+.random-result-head-actions {
+  margin-left: auto;
+}
+
+.random-result-count {
+  color: var(--fg-muted);
+  font-size: 12px;
+}
+
+.random-output {
+  min-height: 320px;
+  max-height: 480px;
+  margin: 0;
+  line-height: 1.7;
+}
+
+/* ---------- 解析结果 ---------- */
+
+.random-parse-list {
+  margin: 0;
+}
+
+.random-parse-row {
+  display: grid;
+  grid-template-columns: 130px minmax(0, 1fr);
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.random-parse-row:last-child {
+  border-bottom: 0;
+}
+
+.random-parse-row dt {
+  color: var(--fg-muted);
+}
+
+.random-parse-row dd {
+  font-family: var(--font-mono);
+  overflow-wrap: anywhere;
+}
+
+.random-error-host {
+  margin-top: 10px;
+}
+
+.random-error-host .error-box {
+  margin: 0;
+}
+
+/* ---------- 窄屏 ---------- */
+
+@media (max-width: 900px) {
+  .random-result-col {
+    margin-top: 4px;
+  }
+
+  .random-parse-row {
+    grid-template-columns: 110px minmax(0, 1fr);
+  }
+}
