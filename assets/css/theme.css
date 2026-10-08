@@ -1,0 +1,70 @@
+/* ============================================================
+   主题变量（全站唯一颜色来源）
+   工具的私有 CSS 只允许引用这里的变量，不允许写死颜色。
+   <html data-theme="light|dark"> 由 assets/js/theme.mjs 切换。
+   ============================================================ */
+
+:root {
+  /* 布局常量（与颜色无关，但集中管理） */
+  --radius-s: 6px;
+  --radius-m: 10px;
+  --radius-l: 16px;
+  --shadow-s: 0 1px 2px rgba(0, 0, 0, 0.08);
+  --shadow-m: 0 4px 16px rgba(0, 0, 0, 0.12);
+  --sidebar-width: 264px;
+  --topbar-height: 52px;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+/* 浅色（默认） */
+:root,
+html[data-theme='light'] {
+  color-scheme: light;
+  --bg: #f5f6f8;
+  --bg-raise: #ffffff;
+  --bg-inset: #eef0f3;
+  --fg: #1f2430;
+  --fg-2: #4b5261;
+  --fg-muted: #8a91a0;
+  --border: #dde0e6;
+  --border-strong: #c6cad2;
+  --accent: #2f6fed;
+  --accent-hover: #265ec9;
+  --accent-fg: #ffffff;
+  --accent-weak: rgba(47, 111, 237, 0.12);
+  --danger: #d5392c;
+  --danger-bg: #fdf0ee;
+  --ok: #1d8a4e;
+  --ok-bg: #eaf7f0;
+  --warn: #9a6700;
+  --warn-bg: #fdf3e0;
+  --focus-ring: 0 0 0 3px rgba(47, 111, 237, 0.35);
+  --shadow-s: 0 1px 2px rgba(15, 23, 42, 0.08);
+  --shadow-m: 0 6px 24px rgba(15, 23, 42, 0.12);
+}
+
+/* 深色 */
+html[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #15171c;
+  --bg-raise: #1e2128;
+  --bg-inset: #171a20;
+  --fg: #e8eaf0;
+  --fg-2: #b7bdc9;
+  --fg-muted: #7d8493;
+  --border: #2e333d;
+  --border-strong: #3d4350;
+  --accent: #5b8dff;
+  --accent-hover: #7aa3ff;
+  --accent-fg: #0d1220;
+  --accent-weak: rgba(91, 141, 255, 0.16);
+  --danger: #f26d5f;
+  --danger-bg: rgba(210, 57, 44, 0.14);
+  --ok: #4cc38a;
+  --ok-bg: rgba(29, 138, 78, 0.16);
+  --warn: #d9a73c;
+  --warn-bg: rgba(154, 103, 0, 0.18);
+  --focus-ring: 0 0 0 3px rgba(91, 141, 255, 0.4);
+  --shadow-s: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-m: 0 6px 24px rgba(0, 0, 0, 0.55);
+}
