@@ -1,0 +1,323 @@
+/* ============================================================
+   基础样式：reset、排版、以及供所有工具直接复用的表单 / 布局组件。
+   工具无需自带大量 CSS；工具特有样式放在 tools/<id>/style.css，
+   通过 ctx.loadStyle() 加载。
+   所有颜色一律引用 theme.css 中的变量。
+   ============================================================ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", "PingFang SC", "Hiragino Sans GB",
+    "Microsoft YaHei", sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--fg);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4,
+p,
+dl,
+dd,
+figure {
+  margin: 0;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+code,
+kbd {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+  background: var(--bg-inset);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-s);
+  padding: 0 4px;
+}
+
+:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-radius: var(--radius-s);
+}
+
+::selection {
+  background: var(--accent-weak);
+}
+
+/* ---------- 通用按钮 ---------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px 14px;
+  font: inherit;
+  font-weight: 500;
+  color: var(--fg);
+  background: var(--bg-raise);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-s);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.btn:hover {
+  background: var(--bg-inset);
+  text-decoration: none;
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  color: var(--accent-fg);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.btn-primary:hover {
+  color: var(--accent-fg);
+  background: var(--accent-hover);
+}
+
+.btn-ghost {
+  background: transparent;
+  border-color: transparent;
+}
+
+.btn-ghost:hover {
+  background: var(--bg-inset);
+}
+
+.btn-sm {
+  padding: 4px 10px;
+  font-size: 13px;
+}
+
+/* 复制按钮（assets/js/ui.mjs copyButton）*/
+.copy-btn.is-copied {
+  color: var(--ok);
+  border-color: var(--ok);
+  background: var(--ok-bg);
+}
+
+.copy-btn.is-failed {
+  color: var(--danger);
+  border-color: var(--danger);
+  background: var(--danger-bg);
+}
+
+/* ---------- 表单控件 ---------- */
+
+label {
+  user-select: none;
+}
+
+input[type='text'],
+input[type='search'],
+input[type='number'],
+input[type='password'],
+input[type='url'],
+input[type='email'],
+textarea,
+select {
+  font: inherit;
+  color: var(--fg);
+  background: var(--bg-raise);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-s);
+  padding: 7px 10px;
+  max-width: 100%;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--fg-muted);
+}
+
+textarea {
+  display: block;
+  width: 100%;
+  min-height: 160px;
+  resize: vertical;
+  font-family: var(--font-mono);
+  line-height: 1.5;
+  tab-size: 2;
+}
+
+input[type='text']:focus-visible,
+input[type='search']:focus-visible,
+input[type='number']:focus-visible,
+input[type='password']:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: var(--focus-ring);
+}
+
+.field-label {
+  display: inline-block;
+  font-weight: 500;
+  color: var(--fg-2);
+  margin-bottom: 6px;
+}
+
+.field-hint {
+  color: var(--fg-muted);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* 分段切换（单选组） */
+.seg {
+  display: inline-flex;
+  padding: 2px;
+  gap: 2px;
+  background: var(--bg-inset);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-s);
+}
+
+.seg > button {
+  font: inherit;
+  font-size: 13px;
+  color: var(--fg-2);
+  background: transparent;
+  border: 0;
+  border-radius: calc(var(--radius-s) - 2px);
+  padding: 4px 12px;
+  cursor: pointer;
+}
+
+.seg > button[aria-pressed='true'],
+.seg > button[aria-selected='true'] {
+  color: var(--accent-fg);
+  background: var(--accent);
+  font-weight: 500;
+}
+
+/* ---------- 工具页常用布局 ---------- */
+
+/* 两栏布局（输入 / 输出），窄屏自动堆叠 */
+.two-col {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .two-col {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* 表单行 */
+.form-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+/* 统计 / 结果网格（dl） */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.stat-grid .stat {
+  background: var(--bg-raise);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-m);
+  padding: 10px 12px;
+}
+
+.stat-grid .stat dt {
+  color: var(--fg-muted);
+  font-size: 12px;
+  margin-bottom: 2px;
+}
+
+.stat-grid .stat dd {
+  font-family: var(--font-mono);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--fg);
+}
+
+/* 输出区域（代码块风格） */
+.output-box {
+  background: var(--bg-inset);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-m);
+  padding: 10px 12px;
+  overflow: auto;
+  min-height: 60px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+/* ---------- 错误 / 成功提示（assets/js/ui.mjs showError） ---------- */
+
+.error-box {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  margin: 10px 0;
+  padding: 8px 12px;
+  border-left: 3px solid var(--danger);
+  border-radius: var(--radius-s);
+  background: var(--danger-bg);
+  color: var(--danger);
+  overflow-wrap: anywhere;
+}
+
+.ok-box {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  margin: 10px 0;
+  padding: 8px 12px;
+  border-left: 3px solid var(--ok);
+  border-radius: var(--radius-s);
+  background: var(--ok-bg);
+  color: var(--ok);
+  overflow-wrap: anywhere;
+}

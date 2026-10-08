@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="码工具箱：纯前端、离线可用的中文开发者工具合集，数据只在浏览器本地处理。" />
+    <title>码工具箱 - 离线开发者工具</title>
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="assets/css/theme.css" />
+    <link rel="stylesheet" href="assets/css/base.css" />
+    <link rel="stylesheet" href="assets/css/shell.css" />
+    <script>
+      // 在首帧渲染前确定主题，避免闪烁；与 assets/js/theme.mjs 使用同一存储键。
+      (function () {
+        try {
+          var saved = localStorage.getItem('glm-toolbox:theme');
+          var theme =
+            saved === 'light' || saved === 'dark'
+              ? saved
+              : matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'dark'
+                : 'light';
+          document.documentElement.dataset.theme = theme;
+        } catch (e) {
+          document.documentElement.dataset.theme = 'light';
+        }
+      })();
+    </script>
+    <script type="module" src="assets/js/app.mjs"></script>
+  </head>
+  <body>
+    <div class="app">
+      <aside class="sidebar" id="sidebar" aria-label="侧边栏">
+        <a class="brand" href="#/">
+          <span class="brand-mark" aria-hidden="true">🧰</span>
+          <span>
+            码工具箱
+            <span class="brand-sub">离线 · 本地处理 · 不上传</span>
+          </span>
+        </a>
+        <div class="search-box">
+          <input
+            id="search-input"
+            type="search"
+            placeholder="搜索工具…（按 / 聚焦）"
+            aria-label="搜索工具"
+            autocomplete="off"
+            spellcheck="false"
+          />
+        </div>
+        <nav class="tool-nav" id="tool-nav" aria-label="工具列表">
+          <p class="nav-empty">正在加载工具列表…</p>
+        </nav>
+        <div class="sidebar-foot">所有数据仅在浏览器本地处理</div>
+      </aside>
+
+      <div class="main">
+        <header class="topbar">
+          <button class="icon-btn menu-btn" id="menu-btn" aria-label="打开菜单" aria-expanded="false" aria-controls="sidebar">
+            <span aria-hidden="true">☰</span>
+          </button>
+          <div class="topbar-title" id="topbar-title">码工具箱</div>
+          <button class="icon-btn theme-btn" id="theme-btn" aria-label="切换主题" title="切换深色 / 浅色主题">
+            <span id="theme-btn-icon" aria-hidden="true">🌙</span>
+          </button>
+        </header>
+        <main class="content" id="content" aria-live="polite">
+          <div class="state-page"><p class="state-detail">正在加载…</p></div>
+        </main>
+      </div>
+    </div>
+  </body>
+</html>
