@@ -1,0 +1,297 @@
+/* 颜色工具私有样式（经 ctx.loadStyle 加载，切换工具时自动移除）。
+   通用样式（按钮 / 两栏布局 / 错误提示等）见 assets/css/base.css；
+   所有颜色一律引用 assets/css/theme.css 的变量，展示的「用户颜色」由 JS 内联写入。 */
+
+.color .tool-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 14px;
+  margin-bottom: 14px;
+}
+
+.color .tool-title {
+  font-size: 20px;
+}
+
+.color .tool-desc {
+  color: var(--fg-muted);
+  flex: 1 1 240px;
+}
+
+/* ---------- 面板 ---------- */
+
+.color-panel {
+  background: var(--bg-raise);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-m);
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+
+.color-section-title {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.color-panel .field-label {
+  margin-bottom: 6px;
+}
+
+/* ---------- 输入行 ---------- */
+
+.color-input-row {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.color-input {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-mono);
+}
+
+.color-input-row input[type='color'] {
+  width: 46px;
+  height: 36px;
+  padding: 3px;
+  cursor: pointer;
+  background: var(--bg-raise);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-s);
+}
+
+/* 截断 / 混合提示（解析成功但有数值被限制） */
+.color-note {
+  margin: 10px 0;
+  padding: 8px 12px;
+  border-left: 3px solid var(--warn);
+  border-radius: var(--radius-s);
+  background: var(--warn-bg);
+  color: var(--warn);
+  overflow-wrap: anywhere;
+}
+
+/* ---------- 预览色块 ---------- */
+
+.color-swatch {
+  position: relative;
+  min-height: 180px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-m);
+  overflow: hidden;
+  /* 棋盘格：半透明颜色下方透出的图案 */
+  background-image: conic-gradient(
+    var(--bg-inset) 0 25%,
+    var(--bg-raise) 0 50%,
+    var(--bg-inset) 0 75%,
+    var(--bg-raise) 0
+  );
+  background-size: 16px 16px;
+}
+
+.color-swatch-fill {
+  position: absolute;
+  inset: 0;
+}
+
+.color-swatch-hex {
+  position: absolute;
+  left: 10px;
+  bottom: 8px;
+  z-index: 1;
+  font-size: 13px;
+  background: transparent;
+  border: 0;
+  padding: 0;
+}
+
+/* ---------- 输出格式 ---------- */
+
+.color-formats {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.color-format {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.color-format-label {
+  flex: 0 0 76px;
+  color: var(--fg-2);
+  font-size: 13px;
+}
+
+.color-format-value {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.color-exact-badge {
+  flex: none;
+  font-size: 12px;
+  color: var(--ok);
+  background: var(--ok-bg);
+  border: 1px solid var(--ok);
+  border-radius: var(--radius-s);
+  padding: 0 6px;
+}
+
+/* ---------- 对比度检查 ---------- */
+
+.color-contrast-row {
+  margin-bottom: 0;
+}
+
+.color-contrast-row input[type='text'] {
+  width: 150px;
+  font-family: var(--font-mono);
+}
+
+.color-contrast-row input[type='color'] {
+  width: 40px;
+  height: 34px;
+  padding: 3px;
+  cursor: pointer;
+  background: var(--bg-raise);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-s);
+}
+
+.color-ratio {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.color-ratio-value {
+  font-family: var(--font-mono);
+  font-size: 26px;
+  font-weight: 600;
+}
+
+.color-verdicts {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 6px;
+}
+
+.color-verdict {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-s);
+  background: var(--bg-inset);
+  font-size: 13px;
+}
+
+.color-verdict-label {
+  color: var(--fg-2);
+}
+
+.color-verdict-value {
+  font-weight: 600;
+}
+
+.color-verdict-value.is-ok {
+  color: var(--ok);
+}
+
+.color-verdict-value.is-fail {
+  color: var(--danger);
+}
+
+.color-sample {
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-m);
+  min-height: 120px;
+}
+
+.color-sample-normal {
+  font-size: 14px;
+}
+
+.color-sample-large {
+  margin-top: 10px;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+/* ---------- 明度阶梯色板 ---------- */
+
+.color-shades {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(58px, 1fr));
+  gap: 8px;
+}
+
+.color-shade {
+  position: relative;
+  height: 64px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-s);
+  cursor: pointer;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.color-shade:hover,
+.color-shade:focus-visible {
+  border-color: var(--accent);
+}
+
+.color-shade-hex {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 4px;
+  display: block;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  background: transparent;
+  border: 0;
+  padding: 0;
+  text-align: center;
+  color: inherit;
+  pointer-events: none;
+}
+
+.color-shade-copied {
+  display: block;
+  min-height: 18px;
+  margin-top: 6px;
+}
+
+/* ---------- 窄屏 ---------- */
+
+@media (max-width: 900px) {
+  .color-contrast-row {
+    align-items: flex-start;
+  }
+
+  .color-contrast-row .field-label {
+    flex: 1 0 100%;
+    margin: 4px 0 0;
+  }
+
+  .color-sample-col {
+    margin-top: 4px;
+  }
+}
