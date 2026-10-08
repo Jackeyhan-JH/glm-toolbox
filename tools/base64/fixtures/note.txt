@@ -1,0 +1,2 @@
+码工具箱 Base64 文件模式测试文本
+second line: hello?>~
