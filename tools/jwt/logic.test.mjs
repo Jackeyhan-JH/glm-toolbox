@@ -94,8 +94,19 @@ test('alg 为 none 的令牌：能解析并给出安全警告', () => {
   assert.equal(r.alg, 'none');
   assert.equal(r.algFamily, 'none');
   assert.ok(r.warnings.some((w) => w.code === 'alg-none' && w.text.includes('安全警告')));
+  assert.ok(r.warnings.some((w) => w.text.includes('alg 为 none')));
   assert.equal(r.signature.byteLength, 0); // 第三段为空
   assert.equal(r.signature.hex, '');
+});
+
+test('alg 为 NONE / None 等大小写变体：同样给出安全警告并按未签名处理', () => {
+  for (const alg of ['NONE', 'None']) {
+    const r = parseToken(buildJwt({ alg, typ: 'JWT' }, { a: 1 }));
+    assert.equal(r.ok, true, alg);
+    assert.equal(r.algFamily, 'none', alg);
+    assert.ok(r.warnings.some((w) => w.code === 'alg-none' && w.text.includes('安全警告')), alg);
+    assert.ok(r.warnings.some((w) => w.text.includes(`alg 为 ${alg}`)), alg);
+  }
 });
 
 test('头部缺少 alg：解析成功但给出警告', () => {
@@ -152,6 +163,21 @@ test('错误：载荷是 JSON 但不是对象 → 提示不是 JSON 对象', () 
   const r = parseToken(`${b64url('{"alg":"HS256"}')}.${b64url('[1,2]')}.AAAA`);
   assert.equal(r.ok, false);
   assert.equal(r.error, '第 2 段（载荷）不是 JSON 对象');
+});
+
+test('错误：载荷与签名同时有问题 → 先报载荷的问题（错误优先级）', () => {
+  // 载荷不是 JSON + 签名段非法 Base64URL
+  const r1 = parseToken(`${b64url('{"alg":"HS256"}')}.${b64url('not json')}.ab+cd`);
+  assert.equal(r1.ok, false);
+  assert.equal(r1.error, '第 2 段（载荷）不是合法 JSON');
+  // 载荷段非法 Base64URL + 签名段非法 Base64URL
+  const r2 = parseToken(`${b64url('{"alg":"HS256"}')}.ab+cd.ef$g`);
+  assert.equal(r2.ok, false);
+  assert.match(r2.error, /^第 2 段（载荷）解码失败/);
+  // 头部与签名同时有问题 → 先报头部
+  const r3 = parseToken(`eyJ$.${b64url('{"a":1}')}.ef$g`);
+  assert.equal(r3.ok, false);
+  assert.match(r3.error, /^第 1 段（头部）解码失败/);
 });
 
 /* ==================== 状态徽标（注入 now） ==================== */
@@ -357,17 +383,31 @@ test('验签：alg 为 none → 提示未签名；RS / ES / PS / 未知算法 �
   assert.equal(none.kind, 'unsigned');
   assert.equal(none.message, '该 JWT 未签名（alg 为 none），无需验签');
 
+  // 大小写变体同样按未签名处理
+  const upper = await verifyToken(parseToken(buildJwt({ alg: 'NONE', typ: 'JWT' }, { a: 1 })), 'any-key');
+  assert.equal(upper.kind, 'unsigned');
+  assert.equal(upper.message, '该 JWT 未签名（alg 为 NONE），无需验签');
+
+  // 提示文案与 issue 原文一致（算法名由界面单独显示）
   for (const alg of ['RS256', 'ES384', 'PS512', 'EdDSA']) {
     const parsed = parseToken(buildJwt({ alg, typ: 'JWT' }, { a: 1 }));
     const r = await verifyToken(parsed, 'some-key');
     assert.equal(r.kind, 'unsupported');
     assert.equal(r.kindClass, 'warn');
-    assert.equal(r.message, `暂不支持该算法（${alg}）验签，仅解析`);
+    assert.equal(r.message, '暂不支持该算法验签，仅解析');
   }
 
   const noAlg = await verifyToken(parseToken(buildJwt({ typ: 'JWT' }, { a: 1 })), 'k');
   assert.equal(noAlg.kind, 'unsupported');
   assert.match(noAlg.message, /缺少 alg/);
+});
+
+test('验签：Base64 密钥解码后为空（====）→ 中文提示，不出现英文报错', async () => {
+  const r = await verifyToken(parseToken(TOKEN1), '====', { base64: true });
+  assert.equal(r.kind, 'key-error');
+  assert.equal(r.kindClass, 'bad');
+  assert.equal(r.message, '密钥解码后为空，无法验签');
+  assert.ok(!/[a-z]/.test(r.message)); // 不夹杂英文报错
 });
 
 test('verifyHmacSignature：直接比较已知向量', async () => {
@@ -404,11 +444,13 @@ test('bytesToHex：小写连续', () => {
   assert.equal(bytesToHex(new Uint8Array([])), '');
 });
 
-test('algFamily：算法分类', () => {
+test('algFamily：算法分类（none 不区分大小写）', () => {
   assert.equal(algFamily('HS256'), 'HS');
   assert.equal(algFamily('RS256'), 'RS');
   assert.equal(algFamily('PS256'), 'PS');
   assert.equal(algFamily('ES512'), 'ES');
   assert.equal(algFamily('none'), 'none');
+  assert.equal(algFamily('NONE'), 'none');
+  assert.equal(algFamily('None'), 'none');
   assert.equal(algFamily('EdDSA'), 'other');
 });

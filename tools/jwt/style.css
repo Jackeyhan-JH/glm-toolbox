@@ -110,9 +110,21 @@
 }
 
 .jwt-verify-result.is-hint {
-  color: var(--fg-muted);
+  color: var(--fg-2); /* --fg-muted 在浅色主题下对比度不足 */
   border-color: var(--border-strong);
   background: var(--bg-inset);
+}
+
+/* 「暂不支持该算法验签」等提示中单独显示的算法名 */
+.jwt-verify-alg {
+  margin-left: 8px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+/* 每个复制按钮的独立容器（测试按 testid 定位到具体按钮） */
+.jwt-copy {
+  display: inline-flex;
 }
 
 /* ---------- token 三段着色 ---------- */
@@ -150,7 +162,6 @@
   font-style: normal;
   font-size: 11px;
   font-family: system-ui, sans-serif;
-  opacity: 0.75;
   margin-right: 4px;
 }
 
@@ -241,7 +252,7 @@
 }
 
 .jwt-claims thead th {
-  color: var(--fg-muted);
+  color: var(--fg-2); /* --fg-muted 在浅色主题下对比度不足 */
   font-weight: 500;
   font-size: 12px;
   background: var(--bg-inset);
@@ -272,7 +283,7 @@
 }
 
 .jwt-claim-rel {
-  color: var(--fg-muted);
+  color: var(--fg-2); /* --fg-muted 在浅色主题下对比度不足 */
 }
 
 .jwt-claim-desc {

@@ -109,13 +109,20 @@ test.describe('JWT：解析', () => {
     await expect(page.getByTestId('jwt-payload-json')).toContainText('"name": "John Doe"');
   });
 
-  test('alg 为 none：能解析并显示安全警告', async ({ page }) => {
+  test('alg 为 none：能解析并显示安全警告（NONE / None 变体同样警告）', async ({ page }) => {
     await openTool(page, 'jwt');
     await page.locator(INPUT).fill(TOKEN_NONE);
     await expect(page.getByTestId('jwt-payload-json')).toContainText('"a": 1');
     await expect(page.getByTestId('jwt-warnings')).toContainText('安全警告');
     await expect(page.getByTestId('jwt-warnings')).toContainText('alg 为 none');
     await expect(page.getByTestId('jwt-signature-hex')).toHaveText('（无签名）');
+    await expect(page.getByTestId('jwt-verify-result')).toContainText('未签名');
+
+    // 大小写变体：同样给出安全警告，不会判有效
+    await page.locator(INPUT).fill(`${b64url(JSON.stringify({ alg: 'NONE', typ: 'JWT' }))}.${b64url(JSON.stringify({ a: 1 }))}.`);
+    await expect(page.getByTestId('jwt-warnings')).toContainText('安全警告');
+    await expect(page.getByTestId('jwt-warnings')).toContainText('alg 为 NONE');
+    await page.locator(KEY).fill('some-key');
     await expect(page.getByTestId('jwt-verify-result')).toContainText('未签名');
   });
 });
@@ -168,12 +175,14 @@ test.describe('JWT：验签', () => {
     await expect(page.getByTestId('jwt-verify-result')).toContainText('密钥不是合法的 Base64');
   });
 
-  test('alg 为 RS256：输入密钥后显示「暂不支持该算法验签」', async ({ page }) => {
+  test('alg 为 RS256：输入密钥后显示「暂不支持该算法验签」，算法名单独显示', async ({ page }) => {
     await openTool(page, 'jwt');
     await page.locator(INPUT).fill(TOKEN_RS256);
     await page.locator(KEY).fill('some-key');
-    await expect(page.getByTestId('jwt-verify-result')).toHaveText('暂不支持该算法（RS256）验签，仅解析');
     await expect(page.getByTestId('jwt-verify-result')).toHaveClass(/is-warn/);
+    // 提示文案与 issue 原文一致，算法名在旁边单独显示
+    await expect(page.getByTestId('jwt-verify-message')).toHaveText('暂不支持该算法验签，仅解析');
+    await expect(page.getByTestId('jwt-verify-alg')).toHaveText('算法 RS256');
   });
 
   test('「显示 / 隐藏」切换密钥可见性，不影响验签', async ({ page }) => {
@@ -208,23 +217,28 @@ test.describe('JWT：时间与状态（page.clock）', () => {
 });
 
 test.describe('JWT：复制与更新', () => {
-  test('复制头部 / 载荷 / 签名写入剪贴板，与显示一致', async ({ page }) => {
+  // 点击某个复制按钮（按容器 testid 精确定位），等该按钮显示「已复制」后读回剪贴板。
+  // 复制按钮点完后有 1500ms 都叫「已复制」，因此断言必须限定在各自容器内，避免 strict mode 命中多个。
+  async function copyAndReadBack(page, wrapperId, label, expected) {
+    const wrap = page.getByTestId(wrapperId);
+    await wrap.getByRole('button', { name: label }).click();
+    await expect(wrap.getByRole('button', { name: '已复制' })).toBeVisible();
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(expected);
+  }
+
+  test('复制头部 / 载荷 / 签名 / 十六进制写入剪贴板，与显示一致', async ({ page }) => {
     await openTool(page, 'jwt');
     await page.locator(INPUT).fill(TOKEN1);
     await expect(page.getByTestId('jwt-header-json')).toContainText('"alg": "HS256"'); // 等渲染完成再取文本
 
     const headerJson = await page.getByTestId('jwt-header-json').textContent();
-    await page.getByRole('button', { name: '复制头部' }).click();
-    await expect(page.getByRole('button', { name: '已复制' })).toBeVisible();
-    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(headerJson);
-
     const payloadJson = await page.getByTestId('jwt-payload-json').textContent();
-    await page.getByRole('button', { name: '复制载荷' }).click();
-    await expect(page.getByRole('button', { name: '已复制' })).toBeVisible();
-    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(payloadJson);
+    const hex = await page.getByTestId('jwt-signature-hex').textContent();
 
-    await page.getByRole('button', { name: '复制签名' }).click();
-    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe('SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c');
+    await copyAndReadBack(page, 'jwt-copy-header', '复制头部', headerJson);
+    await copyAndReadBack(page, 'jwt-copy-payload', '复制载荷', payloadJson);
+    await copyAndReadBack(page, 'jwt-copy-signature', '复制签名', 'SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c');
+    await copyAndReadBack(page, 'jwt-copy-signature-hex', '复制十六进制', hex);
   });
 
   test('输入变化后 300ms 内自动更新（防抖）', async ({ page }) => {

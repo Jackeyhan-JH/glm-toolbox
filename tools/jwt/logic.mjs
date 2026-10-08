@@ -30,9 +30,9 @@ export const CLAIM_INFO = {
 /** 支持验签的算法 → crypto.subtle 的哈希名 */
 const HMAC_HASH = { HS256: 'SHA-256', HS384: 'SHA-384', HS512: 'SHA-512' };
 
-/** alg → 算法家族（HS / RS / PS / ES / none / other） */
+/** alg → 算法家族（HS / RS / PS / ES / none / other）；none 按不区分大小写识别 */
 export function algFamily(alg) {
-  if (alg === 'none') return 'none';
+  if (/^none$/i.test(alg)) return 'none';
   if (/^(HS|RS|PS|ES)/.test(alg)) return alg.slice(0, 2);
   return 'other';
 }
@@ -153,18 +153,12 @@ export function parseToken(raw) {
     return { ok: false, error: `JWT 应由 3 段组成（以 . 分隔），当前为 ${parts.length} 段` };
   }
 
-  const SEGMENTS = [
-    ['第 1 段（头部）', 0],
-    ['第 2 段（载荷）', 1],
-    ['第 3 段（签名）', 2],
-  ];
+  // 先解码并解析头部、载荷（问题优先报前两段），最后再解码签名段
   let headerBytes;
   let payloadBytes;
-  let signatureBytes;
   try {
-    headerBytes = decodeSegment(parts[0], `${SEGMENTS[0][0]}解码失败`);
-    payloadBytes = decodeSegment(parts[1], `${SEGMENTS[1][0]}解码失败`);
-    signatureBytes = decodeSegment(parts[2], `${SEGMENTS[2][0]}解码失败`);
+    headerBytes = decodeSegment(parts[0], '第 1 段（头部）解码失败');
+    payloadBytes = decodeSegment(parts[1], '第 2 段（载荷）解码失败');
   } catch (err) {
     return { ok: false, error: err.message };
   }
@@ -184,12 +178,19 @@ export function parseToken(raw) {
   }
   if (!isPlainObject(payload)) return { ok: false, error: '第 2 段（载荷）不是 JSON 对象' };
 
+  let signatureBytes;
+  try {
+    signatureBytes = decodeSegment(parts[2], '第 3 段（签名）解码失败');
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
+
   const alg = typeof header.alg === 'string' ? header.alg : '';
   const warnings = [];
-  if (alg === 'none') {
+  if (algFamily(alg) === 'none') {
     warnings.push({
       code: 'alg-none',
-      text: '安全警告：该 JWT 的 alg 为 none（未签名），内容可被任意伪造，请勿在生产环境信任此类令牌。',
+      text: `安全警告：该 JWT 的 alg 为 ${alg}（未签名），内容可被任意伪造，请勿在生产环境信任此类令牌。`,
     });
   }
   if (alg === '') {
@@ -371,10 +372,10 @@ export async function verifyToken(parsed, keyText, { base64 = false } = {}) {
     return { kind: 'unsupported', message: '头部缺少 alg 声明，无法验签，仅解析', kindClass: kindClass('unsupported') };
   }
   if (algFamily(alg) === 'none') {
-    return { kind: 'unsigned', message: '该 JWT 未签名（alg 为 none），无需验签', kindClass: kindClass('unsigned') };
+    return { kind: 'unsigned', message: `该 JWT 未签名（alg 为 ${alg}），无需验签`, kindClass: kindClass('unsigned') };
   }
   if (!(alg in HMAC_HASH)) {
-    return { kind: 'unsupported', message: `暂不支持该算法（${alg}）验签，仅解析`, kindClass: kindClass('unsupported') };
+    return { kind: 'unsupported', message: '暂不支持该算法验签，仅解析', kindClass: kindClass('unsupported') };
   }
   if (typeof keyText !== 'string' || keyText.trim() === '') {
     return { kind: 'empty-key', message: '输入密钥后自动验签', kindClass: kindClass('empty-key') };
@@ -385,7 +386,15 @@ export async function verifyToken(parsed, keyText, { base64 = false } = {}) {
   } catch (err) {
     return { kind: 'key-error', message: err.message, kindClass: kindClass('key-error') };
   }
-  const valid = await verifyHmacSignature(parsed.segments, parsed.signature.bytes, keyBytes, HMAC_HASH[alg]);
+  if (keyBytes.length === 0) {
+    return { kind: 'key-error', message: '密钥解码后为空，无法验签', kindClass: kindClass('key-error') };
+  }
+  let valid;
+  try {
+    valid = await verifyHmacSignature(parsed.segments, parsed.signature.bytes, keyBytes, HMAC_HASH[alg]);
+  } catch {
+    return { kind: 'key-error', message: '密钥无法用于 HMAC 验签，请检查密钥内容', kindClass: kindClass('key-error') };
+  }
   return valid
     ? { kind: 'valid', message: '签名有效', kindClass: kindClass('valid') }
     : { kind: 'invalid', message: '签名无效', kindClass: kindClass('invalid') };

@@ -38,9 +38,8 @@ function partSpan(tagText, kind, testid) {
   return { node, set: (v) => { text.data = v; } };
 }
 
-/** 输出栏（标题 + 色点 + 元信息 + 内容框 + 复制按钮） */
-function pane({ title, kind, testid, copyText, copyLabel, boxes }) {
-  const box = boxes.map((b) => b.node);
+/** 输出栏（标题 + 色点 + 内容框 + 复制按钮组）；每个复制按钮包在带 testid 的容器里，便于测试精确定位 */
+function pane({ title, kind, copies = [], boxes }) {
   return el(
     'div',
     { class: `jwt-pane is-${kind}` },
@@ -49,13 +48,16 @@ function pane({ title, kind, testid, copyText, copyLabel, boxes }) {
       { class: 'jwt-pane-head' },
       el('span', { class: `jwt-pane-dot is-${kind}`, 'aria-hidden': 'true' }),
       el('h3', {}, title),
-      el(
-        'div',
-        { class: 'tool-actions' },
-        copyButton(copyText, { label: copyLabel }),
-      ),
+      copies.length > 0 &&
+        el(
+          'div',
+          { class: 'tool-actions' },
+          copies.map(({ testid, label, getText }) =>
+            el('span', { class: 'jwt-copy', 'data-testid': testid }, copyButton(getText, { label })),
+          ),
+        ),
     ),
-    ...box,
+    ...boxes.map((b) => b.node),
   );
 }
 
@@ -154,25 +156,22 @@ export async function mount(root, ctx) {
     pane({
       title: '头部',
       kind: 'header',
-      testid: 'jwt-pane-header',
-      copyLabel: '复制头部',
-      copyText: () => lastParsed?.headerJson ?? '',
+      copies: [{ testid: 'jwt-copy-header', label: '复制头部', getText: () => lastParsed?.headerJson ?? '' }],
       boxes: [headerJson],
     }),
     pane({
       title: '载荷',
       kind: 'payload',
-      testid: 'jwt-pane-payload',
-      copyLabel: '复制载荷',
-      copyText: () => lastParsed?.payloadJson ?? '',
+      copies: [{ testid: 'jwt-copy-payload', label: '复制载荷', getText: () => lastParsed?.payloadJson ?? '' }],
       boxes: [payloadJson],
     }),
     pane({
       title: '签名',
       kind: 'signature',
-      testid: 'jwt-pane-signature',
-      copyLabel: '复制签名',
-      copyText: () => lastParsed?.signature.base64Url ?? '',
+      copies: [
+        { testid: 'jwt-copy-signature', label: '复制签名', getText: () => lastParsed?.signature.base64Url ?? '' },
+        { testid: 'jwt-copy-signature-hex', label: '复制十六进制', getText: () => lastParsed?.signature.hex ?? '' },
+      ],
       boxes: [signatureB64, signatureHex],
     }),
   );
@@ -343,7 +342,11 @@ export async function mount(root, ctx) {
       result = { kind: 'error', message: `验签出错：${err instanceof Error ? err.message : String(err)}`, kindClass: 'bad' };
     }
     if (seq !== verifySeq) return; // 期间已有新一轮验签，丢弃过期结果
-    verifyResult.textContent = result.message;
+    // 提示文案与算法名分开显示（文案与 issue 原文保持一致）
+    verifyResult.replaceChildren(el('span', { 'data-testid': 'jwt-verify-message' }, result.message));
+    if (result.kind === 'unsupported' && parsed.alg !== '') {
+      verifyResult.append(el('span', { class: 'jwt-verify-alg', 'data-testid': 'jwt-verify-alg' }, `算法 ${parsed.alg}`));
+    }
     verifyResult.className = `jwt-verify-result is-${result.kindClass}`;
   }
 
