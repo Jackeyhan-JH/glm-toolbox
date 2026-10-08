@@ -1,0 +1,8 @@
+{
+  "id": "sql-format",
+  "name": "SQL 格式化",
+  "description": "格式化或压缩 SQL 语句，支持常见方言",
+  "category": "data",
+  "keywords": ["sql", "格式化", "压缩", "mysql", "postgresql", "sqlite", "format", "geshihua", "yasuo", "yasuohang"],
+  "order": 40
+}
