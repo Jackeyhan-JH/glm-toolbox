@@ -183,6 +183,10 @@ export async function mount(root, ctx) {
     const html = renderMarkdown(textarea.value, { allowExternalImages });
     const elapsed = performance.now() - started;
     preview.innerHTML = html;
+    // GFM 任务列表复选框没有文字标签，补上可访问名称（勾选状态即语义）
+    for (const box of preview.querySelectorAll('input[type="checkbox"]')) {
+      box.setAttribute('aria-label', box.checked ? '已完成的任务项' : '未完成的任务项');
+    }
     renderCount += 1;
     preview.dataset.renderCount = String(renderCount);
     preview.dataset.renderMs = elapsed >= 0.1 ? String(Math.round(elapsed * 10) / 10) : '0';

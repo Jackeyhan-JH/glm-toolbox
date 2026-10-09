@@ -2,10 +2,11 @@
 /**
  * serve：零依赖本地静态服务器（npm run dev）。
  *
- * 用法：node scripts/serve.mjs [--port 4173] [--root <dir>] [--base /]
+ * 用法：node scripts/serve.mjs [--port 4173] [--root <dir>] [--base /] [--dist]
  *   --port  监听端口（默认 4173）
  *   --root  站点根目录（默认仓库根）
  *   --base  站点挂载的子路径（默认 /；如 --base /glm-toolbox/ 模拟 GitHub Pages）
+ *   --dist  服务构建产物 dist/（PWA / Service Worker 测试用；需先 npm run build）
  *
  * 每次请求 /tools/index.json 都实时扫描 tools/ 生成 ——
  * 新建工具目录后刷新页面即可见，无需重启。
@@ -39,6 +40,7 @@ const MIME_TYPES = {
   '.woff': 'font/woff',
   '.woff2': 'font/woff2',
   '.map': 'application/json',
+  '.webmanifest': 'application/manifest+json; charset=utf-8',
 };
 
 /** 规范化 --base：保证以 / 开头、以 / 结尾 */
@@ -51,10 +53,12 @@ function normalizeBase(base) {
 /**
  * 启动服务器。返回 node:http 的 server（已 listen，未注册进程退出钩子）。
  * 便于测试传入 port: 0 使用随机端口。
+ * dist: true 时服务构建产物 —— tools/index.json 直接用静态文件（产物里没有
+ * *.test.mjs，实时扫描校验会失败），Service Worker 等行为与线上一致。
  */
-export function startServer({ port = 4173, root = REPO_ROOT, base = '/' } = {}) {
+export function startServer({ port = 4173, root = REPO_ROOT, base = '/', dist = false } = {}) {
   const server = http.createServer((req, res) => {
-    handleRequest(req, res, { root: path.resolve(root), base: normalizeBase(base) }).catch((err) => {
+    handleRequest(req, res, { root: path.resolve(root), base: normalizeBase(base), dist }).catch((err) => {
       res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' });
       res.end(`服务器内部错误：${err?.stack ?? err}`);
     });
@@ -63,7 +67,7 @@ export function startServer({ port = 4173, root = REPO_ROOT, base = '/' } = {}) 
   return server;
 }
 
-async function handleRequest(req, res, { root, base }) {
+async function handleRequest(req, res, { root, base, dist }) {
   const url = new URL(req.url, 'http://localhost');
   let pathname;
   try {
@@ -90,8 +94,8 @@ async function handleRequest(req, res, { root, base }) {
 
   const relPath = base === '/' ? pathname : pathname.slice(base.length - 1); // 保留开头的 /
 
-  // 工具索引：每次实时生成
-  if (relPath === '/tools/index.json') {
+  // 工具索引：每次实时生成（构建产物用静态文件，不做实时扫描）
+  if (!dist && relPath === '/tools/index.json') {
     const { index, errors } = buildIndex(path.join(root, 'tools'));
     if (errors.length > 0) {
       res.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
@@ -142,18 +146,27 @@ function main() {
       port: { type: 'string', default: '4173' },
       root: { type: 'string' },
       base: { type: 'string', default: '/' },
+      dist: { type: 'boolean', default: false },
     },
   });
   const port = Number(values.port);
-  const root = values.root ? path.resolve(values.root) : REPO_ROOT;
+  const root = values.root
+    ? path.resolve(values.root)
+    : values.dist
+      ? path.join(REPO_ROOT, 'dist')
+      : REPO_ROOT;
+  if (values.dist && !fs.existsSync(path.join(root, 'index.html'))) {
+    console.error(`dist/ 尚未构建（${root} 下没有 index.html）：请先运行 npm run build`);
+    process.exit(1);
+  }
   const base = normalizeBase(values.base);
-  const server = startServer({ port, root, base });
+  const server = startServer({ port, root, base, dist: values.dist });
   server.on('listening', () => {
     const actual = server.address();
     console.log(`码工具箱开发服务器已启动：`);
     console.log(`  本地地址   http://localhost:${actual.port}${base === '/' ? '/' : base}`);
     console.log(`  站点根目录 ${root}`);
-    console.log(`  工具索引   每次请求实时生成，新增 tools/<id>/ 后刷新即可见`);
+    console.log(values.dist ? '  构建产物   Service Worker 可用（PWA 离线）' : '  工具索引   每次请求实时生成，新增 tools/<id>/ 后刷新即可见');
   });
   server.on('error', (err) => {
     if (err.code === 'EADDRINUSE') {

@@ -138,6 +138,7 @@ export async function mount(root, ctx) {
   const replaceResultBox = el('div', {
     class: 'output-box regex-replace-result',
     'data-testid': 'regex-replace-result',
+    role: 'region', // 允许命名的输出区域（div 本身的 role 不允许 aria-label）
     'aria-label': '替换结果',
   });
 

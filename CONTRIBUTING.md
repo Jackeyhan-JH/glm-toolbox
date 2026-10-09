@@ -140,6 +140,21 @@ npm run e2e          # 或 npx playwright test tools/<id>
 全绿后提交 PR。**不需要**（也不允许）改 `package.json`、侧边栏、路由等任何共享文件 ——
 `tools/index.json` 由脚本自动生成（在 `.gitignore` 里，不要提交）。
 
+## 其他脚本（收尾阶段加入）
+
+```bash
+node scripts/gen-readme.mjs     # 重新生成 README 的工具清单表（--check 供 CI 校验）
+node scripts/screenshots.mjs    # 重新生成 docs/screenshots/ 的 README 截图
+node scripts/make-icons.mjs     # 重新生成 assets/icons/ 的 PWA 图标
+
+npm run build                                  # 生成 dist/（含 sw.js 预缓存清单与 manifest）
+node scripts/serve.mjs --dist --base /glm-toolbox/ --port 4180   # 以 Pages 子路径模式服务 dist/
+```
+
+- `sw.js` 是模板：构建时扫描 `dist/` 注入全部文件的预缓存清单与版本号（任何文件变化即换版本）；
+  注册脚本只注入进 `dist/index.html`，`npm run dev`（源目录）不注册 Service Worker。
+- README 工具清单表位于 `<!-- tools:start -->` / `<!-- tools:end -->` 之间，由脚本维护，CI 会校验。
+
 ## 文件归属规则（并行开发不冲突的关键）
 
 | 路径 | 归属 |

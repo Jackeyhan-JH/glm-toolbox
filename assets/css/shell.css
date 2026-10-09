@@ -8,6 +8,26 @@
   min-height: 100dvh;
 }
 
+/* ---------- 跳到主要内容（键盘用户第一个焦点） ---------- */
+
+.skip-link {
+  position: fixed;
+  top: -48px;
+  left: 8px;
+  z-index: 200;
+  padding: 8px 14px;
+  font-weight: 600;
+  color: var(--accent-fg);
+  background: var(--accent);
+  border-radius: var(--radius-s);
+  transition: top 0.15s ease;
+}
+
+.skip-link:focus {
+  top: 8px;
+  text-decoration: none;
+}
+
 /* ---------- 侧边栏 ---------- */
 
 .sidebar {
@@ -274,19 +294,26 @@
 @media (max-width: 767px) {
   .menu-btn {
     display: inline-flex;
+    width: 40px;
+    height: 40px;
   }
 
   .sidebar {
     position: fixed;
     inset: 0 auto 0 0;
     z-index: 100;
+    width: min(84vw, 320px);
     transform: translateX(-100%);
-    transition: transform 0.2s ease;
+    visibility: hidden; /* 收起时从无障碍树与 Tab 序列中移除 */
+    /* 打开时 visibility 立即生效（可聚焦）；收起时等滑出动画结束后再隐藏 */
+    transition: transform 0.2s ease, visibility 0s 0.2s;
     box-shadow: var(--shadow-m);
   }
 
   .sidebar.open {
     transform: translateX(0);
+    visibility: visible;
+    transition: transform 0.2s ease, visibility 0s;
   }
 
   .sidebar-backdrop {
@@ -299,7 +326,32 @@
     cursor: pointer;
   }
 
+  .search-box input {
+    min-height: 40px;
+  }
+
+  .nav-item {
+    min-height: 40px;
+    font-size: 14px;
+  }
+
+  .icon-btn {
+    width: 40px;
+    height: 40px;
+  }
+
   .content {
     padding: 14px;
   }
+}
+
+/* ---------- 新版本提示（Service Worker，见 assets/js/sw-register.mjs） ---------- */
+
+.sw-update {
+  position: fixed;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  z-index: 150;
+  box-shadow: var(--shadow-m);
 }

@@ -33,7 +33,7 @@ export async function mount(root, ctx) {
   const tokens = el('code', {
     class: 'case-tokens-value',
     'data-testid': 'case-convert-tokens',
-    'aria-label': '分词预览',
+    // 无 aria-label：紧跟可见的「分词：」文字，code 的 role 不允许命名
   });
 
   const clearBtn = el(

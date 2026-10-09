@@ -16,7 +16,10 @@
   --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
 }
 
-/* 浅色（默认） */
+/* 浅色（默认）
+   颜色对比度均按 WCAG AA 校验（正文 ≥ 4.5:1）：
+   --fg-muted / --accent / --danger / --ok / --warn 为最暗一档背景
+   （--bg-inset 或对应浅色底）上的可读文字色。 */
 :root,
 html[data-theme='light'] {
   color-scheme: light;
@@ -25,25 +28,25 @@ html[data-theme='light'] {
   --bg-inset: #eef0f3;
   --fg: #1f2430;
   --fg-2: #4b5261;
-  --fg-muted: #8a91a0;
+  --fg-muted: #62697a;
   --border: #dde0e6;
   --border-strong: #c6cad2;
-  --accent: #2f6fed;
-  --accent-hover: #265ec9;
+  --accent: #2d5fe7;
+  --accent-hover: #2651c4;
   --accent-fg: #ffffff;
-  --accent-weak: rgba(47, 111, 237, 0.12);
-  --danger: #d5392c;
+  --accent-weak: rgba(45, 95, 231, 0.12);
+  --danger: #c9352c;
   --danger-bg: #fdf0ee;
-  --ok: #1d8a4e;
+  --ok: #1b7c4e;
   --ok-bg: #eaf7f0;
-  --warn: #9a6700;
+  --warn: #9a5f00;
   --warn-bg: #fdf3e0;
-  --focus-ring: 0 0 0 3px rgba(47, 111, 237, 0.35);
+  --focus-ring: 0 0 0 3px rgba(45, 95, 231, 0.35);
   --shadow-s: 0 1px 2px rgba(15, 23, 42, 0.08);
   --shadow-m: 0 6px 24px rgba(15, 23, 42, 0.12);
 }
 
-/* 深色 */
+/* 深色（对比度同样满足 AA：--fg-muted 对 --bg-raise ≥ 4.5:1） */
 html[data-theme='dark'] {
   color-scheme: dark;
   --bg: #15171c;
@@ -51,20 +54,20 @@ html[data-theme='dark'] {
   --bg-inset: #171a20;
   --fg: #e8eaf0;
   --fg-2: #b7bdc9;
-  --fg-muted: #7d8493;
+  --fg-muted: #7d8a95;
   --border: #2e333d;
   --border-strong: #3d4350;
-  --accent: #5b8dff;
-  --accent-hover: #7aa3ff;
+  --accent: #5d9dff;
+  --accent-hover: #7fb0ff;
   --accent-fg: #0d1220;
-  --accent-weak: rgba(91, 141, 255, 0.16);
+  --accent-weak: rgba(93, 157, 255, 0.16);
   --danger: #f26d5f;
   --danger-bg: rgba(210, 57, 44, 0.14);
   --ok: #4cc38a;
   --ok-bg: rgba(29, 138, 78, 0.16);
   --warn: #d9a73c;
   --warn-bg: rgba(154, 103, 0, 0.18);
-  --focus-ring: 0 0 0 3px rgba(91, 141, 255, 0.4);
+  --focus-ring: 0 0 0 3px rgba(93, 157, 255, 0.4);
   --shadow-s: 0 1px 2px rgba(0, 0, 0, 0.5);
   --shadow-m: 0 6px 24px rgba(0, 0, 0, 0.55);
 }

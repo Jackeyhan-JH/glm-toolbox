@@ -103,9 +103,13 @@
   bottom: 8px;
   z-index: 1;
   font-size: 13px;
-  background: transparent;
+  /* 深色半透明衬底 + 固定白字：保证文字在任何色块上都满足对比度（WCAG AA）。
+     !important 覆盖内联按亮度选择的黑 / 白字色 —— 有衬底后白色恒为正确选择。 */
+  background: rgba(15, 18, 28, 0.62);
+  color: #ffffff !important;
   border: 0;
-  padding: 0;
+  border-radius: 4px;
+  padding: 1px 6px;
 }
 
 /* ---------- 输出格式 ---------- */
@@ -259,17 +263,19 @@
 
 .color-shade-hex {
   position: absolute;
-  left: 0;
-  right: 0;
+  left: 50%;
   bottom: 4px;
+  transform: translateX(-50%);
   display: block;
   font-size: 11px;
   font-family: var(--font-mono);
-  background: transparent;
+  /* 同 .color-swatch-hex：衬底 + 固定白字保证任意色块上可读 */
+  background: rgba(15, 18, 28, 0.62);
+  color: #ffffff !important;
   border: 0;
-  padding: 0;
+  border-radius: 4px;
+  padding: 1px 6px;
   text-align: center;
-  color: inherit;
   pointer-events: none;
 }
 
