@@ -37,6 +37,10 @@ import {
   formatEntropy,
   passwordStrength,
   selectedClasses,
+  // 随机整数 / 抽取 / 自定义字母表
+  randomInt,
+  pickUnique,
+  parseCustomAlphabet,
   // 解析
   parseId,
   formatIdInfo,
@@ -581,4 +585,25 @@ test('静态检查：tools/random/**/*.mjs（不含测试文件）中不出现�
     const source = fs.readFileSync(file, 'utf8');
     assert.ok(!source.includes('Math.random'), `${path.relative(dir, file)} 中出现了非密码学安全的随机函数`);
   }
+});
+
+test('randomInt：结果为整数且落在给定范围内', () => {
+  for (let i = 0; i < 200; i += 1) {
+    const value = randomInt(1, 10);
+    assert.ok(Number.isInteger(value) && value >= 1 && value <= 10, `越界：${value}`);
+  }
+});
+
+test('pickUnique：数量正确、元素不重复、原数组不变', () => {
+  const items = ['a', 'b', 'c', 'd', 'e'];
+  const picked = pickUnique(items, 3);
+  assert.equal(picked.length, 3);
+  assert.equal(new Set(picked).size, 3);
+  for (const item of picked) assert.ok(items.includes(item));
+  assert.deepEqual(items, ['a', 'b', 'c', 'd', 'e']);
+});
+
+test('parseCustomAlphabet：JSON 输入去重后拼接为字符串', () => {
+  assert.equal(parseCustomAlphabet('["a", "b", "a"]'), 'ab');
+  assert.equal(parseCustomAlphabet('"xyz"'), 'xyz');
 });

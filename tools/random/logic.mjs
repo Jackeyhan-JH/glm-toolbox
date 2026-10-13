@@ -597,3 +597,50 @@ export function parseId(input) {
 export function formatIdInfo(parsed) {
   return parsed.rows.map(({ label, value }) => `${label}：${value}`).join('\n');
 }
+
+/* ============================================================
+ * 随机整数 / 抽取 / 自定义字母表
+ * ============================================================ */
+
+/**
+ * 生成 [min, max] 闭区间内的均匀随机整数（拒绝采样，无取模偏差）。
+ * @param {number} min 下界（含）
+ * @param {number} max 上界（含）
+ * @param {{ randomBytes?: (length: number) => Uint8Array }} [injectable]
+ */
+export function randomInt(min, max, injectable = {}) {
+  if (!Number.isInteger(min) || !Number.isInteger(max)) {
+    throw new Error('上下界必须是整数');
+  }
+  if (min > max) {
+    throw new Error('下界不能大于上界');
+  }
+  return min + randomBelow(max - min, injectable);
+}
+
+/**
+ * 从列表中等概率抽取 count 个不重复元素（返回新数组，不改原数组）。
+ */
+export function pickUnique(items, count, injectable = {}) {
+  const p = [...items];
+  const m = Math.min(p.length, count);
+  for (let i = 0; i < m; i += 1) {
+    const j = i + randomBelow(p.length - i, injectable);
+    const t = p[i]; p[i] = p[j]; p[j] = t;
+  }
+  return p.slice(0, m);
+}
+
+/**
+ * 解析用户粘贴的自定义字母表文本（JSON 数组或单个字符串），去重后拼接返回；
+ * 解析失败时回退 NanoID 默认字母表。
+ */
+export function parseCustomAlphabet(text) {
+  try {
+    const parsed = JSON.parse(text);
+    const chars = Array.isArray(parsed) ? parsed.join('') : String(parsed);
+    return [...new Set(chars)].join('');
+  } catch {
+    return NANO_ID_DEFAULT_ALPHABET;
+  }
+}
