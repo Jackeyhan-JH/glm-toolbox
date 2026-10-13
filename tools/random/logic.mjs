@@ -42,12 +42,22 @@ export function randomBelow(size, { randomBytes = defaultRandomBytes } = {}) {
   if (!Number.isInteger(size) || size <= 0) {
     throw new Error('随机取值范围必须是正整数');
   }
-  const byteCount = size <= 256 ? 1 : 2;
-  const space = byteCount === 1 ? 256 : 65536;
+  // 按需扩位：1 字节覆盖 ≤256，2 字节 ≤65536，依此类推；上限 2^48（远小于安全整数上限，
+  // 之前固定 2 字节，范围超过 65536 时 limit 为 0 会永远拒绝采样而死循环）。
+  let byteCount = 1;
+  let space = 256;
+  while (space < size && byteCount < 6) {
+    space *= 256;
+    byteCount += 1;
+  }
+  if (size > space) {
+    throw new Error('随机取值范围过大（单个随机数最多支持 2^48 种取值）');
+  }
   const limit = space - (space % size);
   for (;;) {
     const bytes = randomBytes(byteCount);
-    const value = byteCount === 1 ? bytes[0] : bytes[0] * 256 + bytes[1];
+    let value = 0;
+    for (const byte of bytes) value = value * 256 + byte;
     if (value < limit) return value % size;
   }
 }
@@ -615,7 +625,8 @@ export function randomInt(min, max, injectable = {}) {
   if (min > max) {
     throw new Error('下界不能大于上界');
   }
-  return min + randomBelow(max - min, injectable);
+  // 闭区间 [min, max] 共 max - min + 1 个取值；min === max 时 randomBelow(1) 恒为 0，直接返回 min。
+  return min + randomBelow(max - min + 1, injectable);
 }
 
 /**

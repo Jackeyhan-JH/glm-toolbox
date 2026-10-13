@@ -594,6 +594,31 @@ test('randomInt：结果为整数且落在给定范围内', () => {
   }
 });
 
+test('randomInt：闭区间上界取得到（回归：漏 +1 时 randomInt(1, 6) 永远取不到 6）', () => {
+  // randomBelow(6) 收到字节 5：5 % 6 = 5 → 1 + 5 = 6；修复前 randomBelow(5) 收到 5：5 % 5 = 0 → 1。
+  const scripted = scriptedBytes([5]);
+  assert.equal(randomInt(1, 6, { randomBytes: scripted.source }), 6);
+  assert.deepEqual(scripted.pulled, [5]);
+});
+
+test('randomInt：min === max 时直接返回该值', () => {
+  const scripted = scriptedBytes([255]);
+  assert.equal(randomInt(3, 3, { randomBytes: scripted.source }), 3);
+});
+
+test('randomInt：范围超过 65536 时走 3 字节通道且能终止（回归：修复前死循环）', () => {
+  const source = cyclicBytes(Array.from({ length: 256 }, (_, i) => i));
+  for (let i = 0; i < 100; i += 1) {
+    const value = randomInt(0, 1_000_000, { randomBytes: source });
+    assert.ok(Number.isInteger(value) && value >= 0 && value <= 1_000_000, `越界：${value}`);
+  }
+  // 单点验证 randomBelow 的扩位：70000 > 65536 需要 3 字节
+  const scripted = scriptedBytes([1, 1, 0]); // 0x010100 = 65792 → 65792 % 70000 = 65792? 不，65792 < 70000 → 返回 65792
+  assert.equal(randomBelow(70000, { randomBytes: scripted.source }), 65792);
+  assert.deepEqual(scripted.pulled, [1, 1, 0]);
+  assert.throws(() => randomBelow(2 ** 48 + 1), /过大/);
+});
+
 test('pickUnique：数量正确、元素不重复、原数组不变', () => {
   const items = ['a', 'b', 'c', 'd', 'e'];
   const picked = pickUnique(items, 3);
